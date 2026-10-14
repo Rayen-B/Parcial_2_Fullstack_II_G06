@@ -1,15 +1,6 @@
 /**
  * style.css — Papita Dulce
  * ------------------------------------------------------------------
- * Hoja de estilos principal del sitio (la página que ve el cliente).
- * Está organizada por secciones, siguiendo el mismo orden que tienen
- * los bloques en index.html: barra superior, navbar, hero, categorías,
- * menú de productos y sus popups, carrito, checkout, cuenta, galería,
- * testimonios, reserva, contacto, footer, etc.
- *
- * Los colores, tipografías y sombras principales están centralizados
- * como variables CSS en :root, para poder cambiar el "look" del sitio
- * modificando solo un lugar.
  */
 
 /* Paleta de colores y sombras reutilizadas en todo el sitio */
@@ -2225,7 +2216,7 @@ footer {
 
 /* --- FIX 1: SEARCH POPUP ---
    Overlay de pantalla completa que se abre al hacer clic en la lupa
-   de la navbar. Se controla con la clase .open (agregada/quitada desde
+   de la navbar. Se controla con la clase .open ( desde
    main.js) y por defecto está oculto fuera de la pantalla. --- */
 #searchOv {
   display: none;
@@ -2600,7 +2591,7 @@ footer {
 }
 
 /* --- SHOPPING CART ---
-   Panel lateral (drawer) que se desliza desde la derecha con los
+   Panel lateral que se desliza desde la derecha con los
    productos agregados, sus cantidades, subtotal y el botón para
    ir a pagar. El contenido se genera dinámicamente en renderCart(). --- */
 #cartPanel {
@@ -2958,7 +2949,7 @@ footer {
 #deliveryAddressBox { margin-bottom: 6px; }
 .payment-method-panel { margin-bottom: 4px; }
 
-/* --- WIZARD DE CHECKOUT (pasos) ---
+/* --- CHECKOUT  ---
    Estilos del formulario de pago dividido en 3 pasos: (1) datos de
    contacto y entrega, (2) elegir método de pago, (3) completar los
    datos de ese método y confirmar. Los pasos se muestran/ocultan
@@ -3112,7 +3103,7 @@ footer {
 /* --- ACCOUNT INTERFACE ---
    Panel de "Mi cuenta": pestañas de iniciar sesión / registrarse,
    recuperación de contraseña y la vista de sesión ya iniciada.
-   La lógica de estos formularios vive en js/auth.js. --- */
+   vdr js/auth.js. --- */
 #accountPanel {
   display: flex;
   position: fixed;
@@ -3167,9 +3158,10 @@ footer {
 .accountbox h2 { margin: 0 0 5px; font-size: 1.8rem; }
 .accountintro, .accounthelp { color: #888; font-size: 0.78rem; line-height: 1.6; }
 .account-session { margin: 18px 0 6px; padding: 12px 14px; border-radius: 10px; background: var(--cream); border: 1px solid var(--border); }
-.account-session p { margin: 0 0 8px; color: var(--dark); font-size: 0.8rem; }
+.account-session p { margin: 0 0 8px; color: var(--dark); font-size: 0.8rem; text-align: center; }
 .account-session p i { color: var(--green); margin-right: 4px; }
-.account-session #accountLogout { margin: 0; color: var(--secondary); }
+.account-session .account-link { margin: 0 auto 8px; text-align: center; }
+.account-session #accountLogout { margin: 0 auto; color: var(--secondary); }
 .account-tabs { display: flex; gap: 6px; margin: 22px 0 16px; border-bottom: 1px solid #eee6df; }
 .account-tab { flex: 1; border: none; border-bottom: 3px solid transparent; background: transparent; color: #999; padding: 10px 4px; cursor: pointer; font: 600 0.78rem "Poppins", sans-serif; }
 .account-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
