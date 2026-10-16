@@ -3,8 +3,7 @@ import { detalleDeOrden, formatearMonto } from '../../services/db';
 
 const METODOS = { tarjeta: 'Tarjeta de crédito / débito', transferencia: 'Transferencia bancaria', efectivo: 'Efectivo contra entrega' };
 
-// Boleta / resumen de una orden: datos del cliente, entrega, productos y total.
-// Se usa en "compra exitosa", "pago con error" y en la boleta del panel de administración.
+// Resumen de una orden: datos del cliente, entrega, productos y total. Se usa en "compra exitosa" y "pago con error".
 export default function ResumenOrden({ orden }) {
   const lineas = detalleDeOrden(orden);
   const entrega = typeof orden.entrega === 'string' ? orden.entrega : orden.entrega?.metodo || 'No informada';

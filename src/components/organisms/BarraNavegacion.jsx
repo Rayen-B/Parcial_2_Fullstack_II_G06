@@ -5,8 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTienda } from '../../context/TiendaContext';
 import images from '../../assets/images';
 
-// Enlaces de la barra superior (mismos nombres y orden que PAPITA_REACT).
-// Cada uno baja al panel de la página de inicio con ese id.
+// Enlaces de la barra superior: cada uno baja al panel de la página de inicio con ese id.
 export const ENLACES = [
   { seccion: 'hero', texto: 'Inicio' },
   { seccion: 'about', texto: 'Nosotros' },

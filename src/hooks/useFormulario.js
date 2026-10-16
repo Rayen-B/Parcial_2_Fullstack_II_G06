@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Estado, validación y envío de los formularios de reserva y contacto.
-// validar(valores) devuelve { campo: mensaje } solo con los campos inválidos.
-//  - cambiar: actualiza el valor y, si el campo ya fue tocado o tenía error, lo revalida en vivo.
-//  - alSalir (onBlur): valida el campo apenas el usuario lo abandona.
-//  - alEnviar(alTerminar) devuelve el handler del onSubmit: valida TODO el formulario antes de enviar.
+// Estado, validación y envío de los formularios de reserva y contacto. validar() devuelve { campo: mensaje }
 export function useFormulario(valoresIniciales, validar) {
   const [valores, setValores] = useState(valoresIniciales);
   const [errores, setErrores] = useState({});

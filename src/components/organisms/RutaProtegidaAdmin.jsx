@@ -12,7 +12,7 @@ export default function RutaProtegidaAdmin({ children, soloAdministrador = false
     return <Navigate to="/" replace />;
   }
 
-  // El Vendedor solo puede ver Dashboard, Órdenes e Inventario
+  // El Vendedor no entra a las páginas solo de Administrador
   if (soloAdministrador && usuario.rol === 'Vendedor') {
     return <Navigate to="/admin/productos" replace />;
   }

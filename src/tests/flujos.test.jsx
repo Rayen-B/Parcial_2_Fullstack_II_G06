@@ -143,7 +143,7 @@ describe('Registro de clientes', () => {
 });
 
 describe('Hub principal, navegación y SEO', () => {
-  it('index (/) es el hub: tiene hero, categorías y enlaces a las vistas principales', () => {
+  it('el inicio (/) tiene hero, categorías y enlaces a las vistas principales', () => {
     const c = renderizar(<Rutas />, { ruta: '/' });
     expect(c.querySelector('h1.htitle')).not.toBeNull();
     const rutas = [...c.querySelectorAll('a')].map((a) => a.getAttribute('href'));
@@ -154,7 +154,7 @@ describe('Hub principal, navegación y SEO', () => {
     renderizar(<Rutas />, { ruta: '/ofertas' });
     expect(document.title).toContain('Ofertas');
   });
-  it('rutas inexistentes vuelven al hub', () => {
+  it('rutas inexistentes vuelven al inicio', () => {
     const c = renderizar(<Rutas />, { ruta: '/no-existe' });
     expect(c.querySelector('h1.htitle')).not.toBeNull();
   });

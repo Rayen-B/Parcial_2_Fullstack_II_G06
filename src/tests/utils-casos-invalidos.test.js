@@ -4,9 +4,6 @@ import { formatearPrecio, precioANumero } from '../utils/formato';
 import { tarjetaVencida, simularPago, TARJETA_RECHAZADA } from '../utils/pago';
 import { crearSlug, descuentoPorcentaje, obtenerProducto } from '../services/db';
 
-// Conclusión de la documentación: no probar solo los casos correctos,
-// también las entradas fuera del negocio (null, undefined, texto, negativos).
-
 describe('Validaciones con entradas fuera del negocio', () => {
   it('validarEmail rechaza null y undefined', () => {
     expect(validarEmail(null).valido).toBe(false);

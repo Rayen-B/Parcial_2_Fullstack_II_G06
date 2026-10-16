@@ -15,7 +15,6 @@ function fijarMeta(nombre, contenido) {
 }
 
 // SEO por página: cada ruta define su propio <title>, meta description, URL canónica y, si corresponde, noindex.
-// (index.html es el único punto de entrada del sitio: el "hub" desde el que se llega al resto de las vistas)
 export function useSeo({ titulo, descripcion, noindex = false }) {
   useEffect(() => {
     const tituloAnterior = document.title;

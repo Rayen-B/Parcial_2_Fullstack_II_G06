@@ -1,6 +1,4 @@
-// Datos de la tienda con operaciones CRUD (Crear, Leer, Actualizar, Eliminar).
-// Los datos se guardan en localStorage a través de services/storage.js, y los componentes de React
-// (tienda y panel admin) los leen desde aquí, así cualquier cambio del admin se ve de inmediato en la tienda.
+// Datos de la tienda con operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
 import * as storage from './storage';
 import { obtenerInsumos, guardarInsumos } from './insumos';
 import { disponibleProducto, esProductoCritico, descontarVenta } from '../utils/stock';

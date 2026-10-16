@@ -40,20 +40,6 @@ export function CartProvider({ children }) {
     });
   };
 
-  // Agrega un ítem ya armado 
-  // Si el mismo producto/variante ya está en el carrito, solo suma la cantidad.
-  const agregarItem = ({ id, codigo, factor = 1, nombre, precio, imagen }, cantidad = 1) => {
-    setCarrito((prev) => {
-      const existe = prev.some((item) => item.id === id);
-      if (existe) {
-        return prev.map((item) =>
-          item.id === id ? { ...item, cantidad: item.cantidad + cantidad } : item
-        );
-      }
-      return [...prev, { id, codigo, factor, nombre, precio, imagen, variante: '', cantidad }];
-    });
-  };
-
   const eliminarDelCarrito = (id, variante) => {
     setCarrito((prev) => prev.filter((item) => !(item.id === id && item.variante === variante)));
   };
@@ -82,7 +68,6 @@ export function CartProvider({ children }) {
       value={{
         carrito,
         agregarAlCarrito,
-        agregarItem,
         eliminarDelCarrito,
         actualizarCantidad,
         vaciarCarrito,

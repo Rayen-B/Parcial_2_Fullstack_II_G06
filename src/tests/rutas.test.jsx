@@ -7,7 +7,6 @@ import { CartProvider } from '../context/CartContext';
 import { TiendaProvider } from '../context/TiendaContext';
 import { AUTH_KEY } from '../services/storage';
 
-// Igual que "Ejemplo 2 – Probar rutas específicas": initialEntries simula que el usuario entró directo a esa ruta.
 function abrirRuta(ruta) {
   render(
     <MemoryRouter initialEntries={[ruta]}>

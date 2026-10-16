@@ -19,7 +19,6 @@ import Boletin from '../components/secciones/Boletin';
 import Contacto from '../components/secciones/Contacto';
 import images from '../assets/images';
 
-// Página principal: es el "hub" del sitio (index.html). Desde aquí se llega a todas las demás vistas.
 export default function Inicio() {
   useSeo({
     titulo: '',
