@@ -7,7 +7,7 @@ import Contacto from '../components/secciones/Contacto';
 import { listarOrdenes, obtenerProducto, crearProducto, buscarProductos, listarProductos } from '../services/db';
 import { filtrarProductos } from '../pages/admin/AdminProductos';
 import { filtrarCatalogo } from '../pages/Productos';
-import { validarCategoria } from '../pages/admin/AdminCategoriaForm';
+import { validarNombreCategoria, CATEGORIAS_DEFAULT } from '../services/categorias';
 import images, { obtenerImagen } from '../assets/images';
 
 const ADMIN = { run: '111111111', usuario: 'admin', nombre: 'Admin', apellidos: 'Papita', correo: 'admin@papitadulce.cl', password: 'admin', rol: 'Administrador' };
@@ -66,11 +66,18 @@ describe('Rutas protegidas del panel', () => {
     const c = renderizar(<Rutas />, { ruta: '/admin/usuarios' });
     expect(textoDe(c)).toContain('Inventario de Productos');
   });
-  it('el administrador ve reportes, categorías y críticos', () => {
+  it('el administrador ve reportes, categorías e insumos', () => {
     iniciarComo(ADMIN);
-    expect(textoDe(renderizar(<Rutas />, { ruta: '/admin/reportes' }))).toContain('Órdenes por estado');
+    expect(textoDe(renderizar(<Rutas />, { ruta: '/admin/reportes' }))).toContain('Estado de órdenes');
     expect(textoDe(renderizar(<Rutas />, { ruta: '/admin/categorias' }))).toContain('Tortas');
-    expect(textoDe(renderizar(<Rutas />, { ruta: '/admin/productos/criticos' }))).toContain('Torta San Jorge');
+    expect(textoDe(renderizar(<Rutas />, { ruta: '/admin/insumos' }))).toContain('Harina');
+  });
+  it('el inventario muestra primero los productos críticos', () => {
+    iniciarComo(ADMIN);
+    const c = renderizar(<Rutas />, { ruta: '/admin/productos' });
+    const primera = c.querySelector('#tabla-productos-body tr');
+    expect(textoDe(primera)).toContain('Brownie con Nueces');
+    expect(textoDe(primera)).toContain('Crítico');
   });
   it('el panel se marca noindex para buscadores', () => {
     iniciarComo(ADMIN);
@@ -318,7 +325,8 @@ describe('Flujo de compra: checkout, pago correcto y pago con error', () => {
     enviarFormulario(formulario(c));
     iniciarComo(ADMIN);
     const id = listarOrdenes().at(-1).id;
-    const panel = renderizar(<Rutas />, { ruta: `/admin/ordenes/${id}` });
+    const panel = renderizar(<Rutas />, { ruta: '/admin/ordenes' });
+    expect(textoDe(panel)).toContain(id);
     expect(textoDe(panel)).toContain('Torta Panqueque Naranja');
   });
 });
@@ -330,22 +338,25 @@ describe('Funciones del panel de administración', () => {
     expect(filtrarProductos(lista, 'beb001')).toHaveLength(1);
     expect(filtrarProductos(lista, 'tortas')).toHaveLength(1);
   });
-  it('validarCategoria exige nombre', () => {
-    expect(validarCategoria({ nombre: '' }).nombre).toBeDefined();
-    expect(validarCategoria({ nombre: 'Panes' })).toEqual({});
+  it('validarNombreCategoria exige nombre y no permite repetidos', () => {
+    expect(validarNombreCategoria('', CATEGORIAS_DEFAULT).valido).toBe(false);
+    expect(validarNombreCategoria('Tortas', CATEGORIAS_DEFAULT).valido).toBe(false);
+    expect(validarNombreCategoria('Panes', CATEGORIAS_DEFAULT).valido).toBe(true);
   });
   it('crear una categoría desde el formulario admin', () => {
     iniciarComo(ADMIN);
     const c = renderizar(<Rutas />, { ruta: '/admin/categoria-form' });
-    escribir(porId(c, 'catNombre'), 'Panes');
-    enviarFormulario(formulario(c));
-    expect(textoDe(c)).toContain('Categoría creada correctamente');
+    escribir(porId(c, 'nombre-categoria'), 'Panes');
+    escribir(porId(c, 'descripcion-categoria'), 'Pan amasado y hallullas.');
+    enviarFormulario(porId(c, 'form-categoria'));
+    expect(textoDe(c)).toContain('creada correctamente');
+    expect(JSON.parse(localStorage.getItem('papita_dulce_categorias')).find((cat) => cat.id === 'panes').descripcion).toBe('Pan amasado y hallullas.');
   });
-  it('actualizar el perfil valida el teléfono', () => {
+  it('actualizar el perfil valida el correo', () => {
     iniciarComo(ADMIN);
     const c = renderizar(<Rutas />, { ruta: '/admin/perfil' });
-    escribir(porId(c, 'perTelefono'), 'abc');
-    enviarFormulario(formulario(c));
-    expect(c.querySelector('.ferr')).not.toBeNull();
+    escribir(porId(c, 'perfil-correo'), 'correo-invalido');
+    enviarFormulario(porId(c, 'perfil-correo').closest('form'));
+    expect(textoDe(c)).toContain('verifique los campos');
   });
 });

@@ -47,6 +47,15 @@ export default function AdminLayout({
     return () => { document.title = anterior; };
   }, [tituloDocumento]);
 
+  // El panel no debe aparecer en buscadores
+  useEffect(() => {
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'robots');
+    meta.setAttribute('content', 'noindex, nofollow');
+    document.head.appendChild(meta);
+    return () => meta.remove();
+  }, []);
+
   const [colapsado, setColapsado] = useState(false); // sidebar angosto en escritorio
   const [menuMovil, setMenuMovil] = useState(false); // sidebar desplegado en celular
 

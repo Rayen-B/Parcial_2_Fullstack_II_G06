@@ -7,6 +7,7 @@ import InsigniaEstado from '../components/atoms/InsigniaEstado';
 import FeedbackCampo, { claseValidacion } from '../components/atoms/FeedbackCampo';
 import { useAuth } from '../context/AuthContext';
 import { obtenerProducto, obtenerUsuarioPorRun, listarUsuarios } from '../services/db';
+import { USUARIOS_DEFAULT } from '../services/storage';
 
 const ADMIN = { run: '111111111', usuario: 'admin', nombre: 'Admin', apellidos: 'Papita', correo: 'admin@papitadulce.cl', password: 'admin', rol: 'Administrador' };
 const comoAdmin = () => localStorage.setItem('tienda_usuario_sesion', JSON.stringify(ADMIN));
@@ -147,23 +148,20 @@ describe('Panel admin: productos', () => {
     escribir(porId(c, 'buscador-productos'), 'selva');
     expect(c.querySelectorAll('#tabla-productos-body tr')).toHaveLength(1);
   });
-  it('reporte de productos muestra el inventario por categoría', () => {
+  it('los reportes muestran ventas y el estado del inventario', () => {
     comoAdmin();
-    expect(textoDe(renderizar(<Rutas />, { ruta: '/admin/productos/reportes' }))).toContain('Valor inventario');
+    const c = renderizar(<Rutas />, { ruta: '/admin/reportes' });
+    expect(textoDe(c)).toContain('Ventas totales');
+    expect(textoDe(c)).toContain('Valor en vitrina');
   });
 });
 
 describe('Panel admin: usuarios, órdenes y boletas', () => {
-  it('lista usuarios y permite ver el historial de compras', () => {
+  it('lista los usuarios registrados', () => {
     comoAdmin();
     const c = renderizar(<Rutas />, { ruta: '/admin/usuarios' });
     expect(textoDe(c)).toContain('alan.brito@duoc.cl');
-    const h = renderizar(<Rutas />, { ruta: '/admin/usuarios/190110222/compras' });
-    expect(textoDe(h)).toContain('ORD-1001');
-  });
-  it('historial de un usuario inexistente muestra aviso', () => {
-    comoAdmin();
-    expect(textoDe(renderizar(<Rutas />, { ruta: '/admin/usuarios/000/compras' }))).toContain('no existe');
+    expect(textoDe(c)).toContain('admin@papitadulce.cl');
   });
   it('crea un usuario nuevo con RUN válido (CRUD: Crear)', () => {
     comoAdmin();
@@ -186,37 +184,36 @@ describe('Panel admin: usuarios, órdenes y boletas', () => {
     enviarFormulario(porId(c, 'form-usuario'));
     expect(textoDe(c)).toContain('verifique los campos');
   });
-  it('la lista de órdenes se puede buscar y enlaza a la boleta', () => {
+  it('la lista de órdenes se puede buscar', () => {
     comoAdmin();
     const c = renderizar(<Rutas />, { ruta: '/admin/ordenes' });
     expect(c.querySelectorAll('tbody tr').length).toBe(5);
     escribir(porId(c, 'buscador-ordenes'), 'trufa');
     expect(c.querySelectorAll('tbody tr')).toHaveLength(1);
-    expect(c.querySelector('a[href="/admin/ordenes/ORD-1004"]')).not.toBeNull();
   });
-  it('la boleta permite cambiar el estado de la orden (CRUD: Actualizar)', () => {
-    comoAdmin();
-    const c = renderizar(<Rutas />, { ruta: '/admin/ordenes/ORD-1002' });
-    escribir(porId(c, 'estadoOrden'), 'Enviado');
-    expect(JSON.parse(localStorage.getItem('papita_dulce_orders')).find((o) => o.id === 'ORD-1002').estado).toBe('Enviado');
-  });
-  it('la boleta imprime con window.print', () => {
+  it('la boleta de una orden se abre y se puede imprimir', () => {
     comoAdmin();
     const imprimir = vi.spyOn(window, 'print').mockImplementation(() => {});
-    const c = renderizar(<Rutas />, { ruta: '/admin/ordenes/ORD-1002' });
-    clic([...c.querySelectorAll('button')].find((b) => b.textContent.includes('Imprimir')));
+    const c = renderizar(<Rutas />, { ruta: '/admin/ordenes' });
+    escribir(porId(c, 'buscador-ordenes'), 'ORD-1002');
+    clic([...c.querySelectorAll('tbody button')].find((b) => b.textContent.includes('Boleta')));
+    expect(document.getElementById('boletaTitulo')).not.toBeNull();
+    expect(textoDe(document.body)).toContain('ORD-1002');
+    clic([...document.querySelectorAll('.modal button')].find((b) => b.textContent.includes('Imprimir Boleta')));
     expect(imprimir).toHaveBeenCalled();
   });
-  it('boleta inexistente muestra aviso', () => {
-    comoAdmin();
-    expect(textoDe(renderizar(<Rutas />, { ruta: '/admin/ordenes/NOPE' }))).toContain('no existe');
-  });
-  it('el perfil se actualiza y queda guardado', () => {
+  it('el perfil no se guarda si faltan datos obligatorios', () => {
     comoAdmin();
     const c = renderizar(<Rutas />, { ruta: '/admin/perfil' });
-    escribir(porId(c, 'perNombre'), 'Administrador');
-    enviarFormulario(formulario(c));
-    expect(textoDe(c)).toContain('Perfil actualizado');
+    enviarFormulario(porId(c, 'perfil-nombre').closest('form'));
+    expect(textoDe(c)).toContain('verifique los campos');
+  });
+  it('el perfil se actualiza y queda guardado', () => {
+    localStorage.setItem('tienda_usuario_sesion', JSON.stringify(USUARIOS_DEFAULT[0]));
+    const c = renderizar(<Rutas />, { ruta: '/admin/perfil' });
+    escribir(porId(c, 'perfil-nombre'), 'Administrador');
+    enviarFormulario(porId(c, 'perfil-nombre').closest('form'));
+    expect(textoDe(c)).toContain('actualizados correctamente');
     expect(JSON.parse(localStorage.getItem('tienda_usuario_sesion')).nombre).toBe('Administrador');
   });
   it('listarUsuarios mantiene el admin incluso tras crear usuarios', () => {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as db from '../services/db';
 import { obtenerUsuarios, USERS_KEY, PRODUCTOS_KEY } from '../services/storage';
+import { obtenerInsumos } from '../services/insumos';
 
 const nuevoProducto = { codigo: 'zz001', nombre: 'Producto Prueba', categoria: 'Tortas', precio: '1000', stock: '5', stockCritico: 2 };
 
@@ -56,15 +57,30 @@ describe('db: CRUD de productos', () => {
   it('productosEnOferta devuelve solo productos con descuento suficiente', () => {
     expect(db.productosEnOferta().every(db.esOferta)).toBe(true);
   });
-  it('descontarStock resta unidades (un trozo = 1/4 de torta)', () => {
+  it('descontarStock vende primero lo que hay en vitrina', () => {
     db.crearProducto(nuevoProducto);
-    db.descontarStock([{ codigo: 'ZZ001', cantidad: 2, variante: 'entera' }, { codigo: 'ZZ001', cantidad: 4, variante: 'trozo' }]);
-    expect(db.obtenerProducto('ZZ001').stock).toBe(2);
+    expect(db.descontarStock([{ codigo: 'ZZ001', cantidad: 2, variante: 'entera' }]).exito).toBe(true);
+    expect(db.obtenerProducto('ZZ001').stock).toBe(3);
   });
-  it('descontarStock nunca deja stock negativo', () => {
+  it('un trozo (1/4 de torta) se prepara con los insumos y no toca la vitrina', () => {
+    db.crearProducto({ ...nuevoProducto, receta: [{ insumoId: 'harina', cantidad: 400 }] });
+    const harinaAntes = obtenerInsumos().find((i) => i.id === 'harina').stock;
+    db.descontarStock([{ codigo: 'ZZ001', cantidad: 4, variante: 'trozo' }]);
+    expect(db.obtenerProducto('ZZ001').stock).toBe(5);
+    expect(obtenerInsumos().find((i) => i.id === 'harina').stock).toBe(harinaAntes - 400);
+  });
+  it('si no alcanza el stock no descuenta nada y avisa qué falta', () => {
     db.crearProducto(nuevoProducto);
-    db.descontarStock([{ codigo: 'ZZ001', cantidad: 99, variante: 'entera' }]);
-    expect(db.obtenerProducto('ZZ001').stock).toBe(0);
+    const r = db.descontarStock([{ codigo: 'ZZ001', cantidad: 99, variante: 'entera', nombre: 'Producto Prueba' }]);
+    expect(r.exito).toBe(false);
+    expect(r.mensaje).toContain('Producto Prueba');
+    expect(db.obtenerProducto('ZZ001').stock).toBe(5);
+  });
+  it('hayStockPara revisa sin descontar', () => {
+    db.crearProducto(nuevoProducto);
+    expect(db.hayStockPara([{ codigo: 'ZZ001', cantidad: 5 }]).exito).toBe(true);
+    expect(db.hayStockPara([{ codigo: 'ZZ001', cantidad: 6 }]).exito).toBe(false);
+    expect(db.obtenerProducto('ZZ001').stock).toBe(5);
   });
 });
 

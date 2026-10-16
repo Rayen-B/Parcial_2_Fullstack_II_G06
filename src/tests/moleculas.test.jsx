@@ -6,6 +6,7 @@ import EncabezadoSeccion from '../components/molecules/EncabezadoSeccion';
 import TarjetaProducto from '../components/molecules/TarjetaProducto';
 import ItemCarrito from '../components/molecules/ItemCarrito';
 import { CartProvider } from '../context/CartContext';
+import { TiendaProvider } from '../context/TiendaContext';
 
 // Variables necesarias para comprobar
 const producto = { codigo: 'TC001', nombre: 'Torta Panqueque', categoria: 'Tortas', precio: 16000, precioAnterior: 20000, stock: 5, descripcion: 'Rica torta', imagen: 'menu/Torta_Trufa' };
@@ -142,14 +143,14 @@ describe('ItemCarrito', () => {
   const item = { id: 'TC001', nombre: 'Torta Panqueque', precio: 16000, imagen: 'menu/Torta_Trufa', variante: 'entera', cantidad: 2 };
 
   it('muestra nombre, precio y cantidad', () => {
-    render(<CartProvider><ItemCarrito item={item} /></CartProvider>);
+    render(<CartProvider><TiendaProvider><ItemCarrito item={item} /></TiendaProvider></CartProvider>);
     expect(screen.getByText('Torta Panqueque')).toBeTruthy();
     expect(screen.getByText('$16.000')).toBeTruthy();
     expect(screen.getByText('2')).toBeTruthy();
   });
 
   it('tiene botones para aumentar, disminuir y eliminar', () => {
-    render(<CartProvider><ItemCarrito item={item} /></CartProvider>);
+    render(<CartProvider><TiendaProvider><ItemCarrito item={item} /></TiendaProvider></CartProvider>);
     expect(screen.getByRole('button', { name: 'Aumentar cantidad' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Disminuir cantidad' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Eliminar Torta Panqueque' })).toBeTruthy();
