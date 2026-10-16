@@ -22,7 +22,7 @@ export default function Entregas() {
             <article className="delivery-card h-100">
               <span className="delivery-icon"><i className="fas fa-truck" aria-hidden="true"></i></span>
               <h3>Despacho a domicilio</h3>
-              <p>Elige “Despacho a domicilio” e ingresa tu región, comuna y dirección. La cobertura y el costo deben confirmarse con la pastelería; esta demostración no calcula tarifas.</p>
+              <p>Elige “Despacho a domicilio” e ingresa tu región, comuna y dirección. La cobertura y el costo del despacho se confirman con la pastelería.</p>
             </article>
           </div>
         </div>

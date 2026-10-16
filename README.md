@@ -1,12 +1,14 @@
 # 🍰 Papita Dulce
 
-Tienda online de la pastelería y cafetería **Papita Dulce**, desarrollada con **React 18 + Vite** y **Bootstrap 5** (Evaluación Parcial 2 · DSY1104 Desarrollo Fullstack II).
+Tienda online de la pastelería y cafetería **Papita Dulce**, con su panel de administración. Desarrollada con **React 18 + Vite** y **Bootstrap 5**.
 
 ## 🛠️ Tecnologías
 
 - React 18 + Vite, React Router DOM 6
 - Bootstrap 5 y React-Bootstrap (diseño responsivo), Font Awesome y Tabler Icons
-- **Vitest + jsdom** para las pruebas unitarias (sintaxis `describe / it / expect`, mocks con `vi.fn()` / `vi.spyOn()`)
+- Swiper (carruseles) y AOS (animaciones)
+- **Vitest + Testing Library + jsdom** para las pruebas unitarias
+- Los datos se guardan en `localStorage` (productos, insumos, categorías, usuarios, órdenes y carrito)
 
 ## 🚀 Cómo ejecutarlo
 
@@ -28,54 +30,58 @@ npm run build        # versión de producción
 | Vendedor | lola.mento@profesor.duoc.cl | Ventas#2026 |
 | Cliente | armando.quito@gmail.com | Cliente!2026 |
 
-Al iniciar sesión en **/login** con `admin` / `admin` se entra directo al **panel de administración** (`/admin`).
-Tarjeta de prueba para un **pago rechazado**: `4000 0000 0000 0002`. Para un pago aprobado: `4532 0151 1283 0366`.
+Al iniciar sesión en **/login** como Administrador o Vendedor se entra al **panel de administración** (`/admin`). El Vendedor solo ve Dashboard, Órdenes, Inventario, Insumos y Reportes.
 
-## 🗺️ Mapa de vistas (según el diagrama de navegación)
+**Pagos:** en el checkout, el botón **"Simular error de pago"** (o la tarjeta `4000 0000 0000 0002`) muestra el caso de pago rechazado; cualquier otra tarjeta válida, como `4532 0151 1283 0366`, aprueba el pago.
 
-**Tienda (pública)**: `/` (hub principal) · `/productos` · `/producto/:id` · `/categorias` · `/categorias/:id` · `/ofertas` · `/nosotros` · `/blog` · `/blog/:id` · `/contacto` · `/login` · `/registro` · `/checkout` · `/compra/exitosa/:id` · `/compra/error/:id`
+## 🗺️ Vistas
 
-**Administración (protegida)**: `/admin` (dashboard) · `/admin/ordenes` · `/admin/ordenes/:id` (boleta) · `/admin/productos` · `/admin/producto-form` (nuevo/editar) · `/admin/productos/criticos` · `/admin/productos/reportes` · `/admin/categorias` · `/admin/categoria-form` · `/admin/usuarios` · `/admin/usuario-form` · `/admin/usuarios/:run/compras` (historial) · `/admin/reportes` · `/admin/perfil`
+**Tienda (pública)**: `/` (inicio) · `/productos` · `/producto/:id` · `/categorias` · `/categorias/:id` · `/ofertas` · `/nosotros` · `/blog` · `/blog/:id` · `/contacto` · `/login` · `/registro` · `/checkout` · `/compra/exitosa/:id` · `/compra/error/:id`
+
+**Administración (protegida)**: `/admin` (dashboard) · `/admin/ordenes` (órdenes y boleta imprimible) · `/admin/productos` (inventario, críticos primero) · `/admin/producto-form` · `/admin/insumos` · `/admin/insumo-form` · `/admin/reportes` · `/admin/categorias` · `/admin/categoria-form` · `/admin/usuarios` · `/admin/usuario-form` · `/admin/perfil`
+
+## 🧁 Stock: vitrina + insumos
+
+Cada producto tiene un **stock en vitrina** (unidades ya preparadas) y, opcionalmente, una **receta** con los insumos que usa una unidad completa.
+
+- **Disponible = vitrina + lo que se puede preparar con los insumos.** Un producto es **crítico** cuando lo disponible es igual o menor a su stock crítico.
+- Al **confirmar el pago**, las unidades salen primero de la vitrina y lo que falte se prepara descontando los insumos de la receta. Si el pago se rechaza, no se descuenta nada.
+- Un **trozo** equivale a 1/4 de torta: usa 1/4 de la receta y no toca la vitrina.
+- Los productos sin receta (bebestibles, sándwiches) se venden solo desde la vitrina.
+- La tienda muestra **"Agotado"** o **"Solo por trozo"** según lo disponible, y el carrito no deja pedir más de lo que hay.
+- En el panel, **Insumos** muestra primero los que hay que reponer, y el **Inventario** muestra vitrina, preparables y disponible de cada producto.
+
+## 📊 Panel de administración
+
+- **Dashboard** con métricas y resumen de productos (los más críticos primero).
+- **Órdenes**: quién compró, qué, cuándo y dónde, con **boleta imprimible**. Los pagos rechazados quedan registrados como "Pago rechazado".
+- **Inventario** con filtro por categoría y orden por prioridad; crear, editar (con receta) y eliminar productos.
+- **Insumos**: crear, editar y eliminar (no se elimina un insumo que usa alguna receta).
+- **Reportes**: ventas por período, productos más vendidos, ventas por categoría, método de pago y tipo de entrega, y estado del inventario.
+- **Categorías**: crear, editar y eliminar (no se elimina una categoría con productos). Lo que se crea aparece en la tienda.
+- **Usuarios** y **Mi Perfil**.
 
 ## 📁 Estructura
 
 ```
 src/
 ├── components/   # atoms · molecules · organisms · secciones (componentes reutilizables)
-├── context/      # Estado global: Auth (sesión), Cart (carrito), Tienda (buscador/carrito)
-├── data/         # Datos iniciales: blog y regiones de Chile
-├── hooks/        # useFormulario (validación), useSeo (SEO por página), useOverlay, ...
+├── context/      # Estado global: Auth (sesión), Cart (carrito), Tienda (buscador, carrito y stock disponible)
+├── data/         # Datos iniciales: recetas, blog y regiones de Chile
+├── hooks/        # useFormulario, useSeo, useOverlay, useCategorias, useSoloAdmin...
 ├── pages/        # Vistas de la tienda y pages/admin (panel)
-├── services/     # storage.js (localStorage) y db.js (archivo de datos con CRUD)
+├── services/     # storage.js (localStorage), db.js (CRUD), categorias.js e insumos.js
 ├── tests/        # Pruebas unitarias (Vitest)
-├── ejemplos-documentacion/  # Código de ejemplo de las presentaciones React II y React IV (se prueba en tests/documentacion-*)
-└── utils/        # Validaciones, formato de precios, pago
+└── utils/        # Validaciones, formato, pago, stock, órdenes y reportes
 ```
 
-## ✅ Correcciones de la Evaluación 1
+## 🔎 SEO
 
-| Observación del profesor | Qué se hizo |
-|---|---|
-| `index` redirigía a `papitadulce/index` (afecta el CEO) | `index.html` es el **único hub**: no hay redirecciones ni páginas duplicadas. Cada vista es una ruta real con su propio `<title>`, meta description y URL canónica (`useSeo`), más `robots.txt`, `sitemap.xml` y `<h1>` único por página. Las rutas privadas llevan `noindex`. |
-| El panel admin debe verse desde el Login (`admin` / `admin`) | Existe el usuario `admin`/`admin`; el login redirige al panel según el rol. Rutas `/admin/*` protegidas. |
-| Formulario de contacto no validaba bien | Validación por campo (al salir del campo y al enviar): nombre solo letras, correo con dominio, teléfono chileno real (antes aceptaba letras), asunto de lista cerrada, mensaje de 10 a 500 caracteres con contador. |
-| Login no validaba bien | `validarLogin`: usuario/correo obligatorio y bien formado, contraseña obligatoria (4+), mensajes por campo y mensaje de credenciales incorrectas. |
+Cada vista tiene su propio `<title>`, meta description y URL canónica (`useSeo`), además de `robots.txt` y `sitemap.xml`. El panel de administración y las páginas de compra se marcan como `noindex`.
 
-## 📚 Evaluación 2 – cumplimiento de requisitos
+## 🧪 Pruebas unitarias
 
-| Requisito | Dónde está |
-|---|---|
-| Migración de HTML a React (componentes reutilizables, props y estado) | `src/components/*`, `src/pages/*`, contextos en `src/context` |
-| Archivo de datos JS con CRUD | `src/services/db.js` (productos, categorías, usuarios, órdenes, blog, reportes) sobre `storage.js` |
-| Persistencia conectada a React | Tienda y admin leen/escriben la misma base: crear un producto en el admin lo muestra en la tienda |
-| Diseño responsivo con Bootstrap | Grillas `col-12 col-sm-6 col-lg-4`, navbar colapsable, tablas `table-responsive`, sidebar admin móvil |
-| Vistas adicionales | Categorías, ofertas, checkout, pago correcto/error, blog + detalle, boletas, críticos, reportes, perfil, historial de compras |
-| Interactividad mejorada | Formularios con validación, filtros y búsqueda (`?q=`, `?categoria=`), buscador con sugerencias |
-| Pruebas unitarias | `src/tests/*.test.*` (374 pruebas): renderizado, props, estado, eventos, mocks, flujos completos |
-
-## 🧪 Pruebas unitarias: estilo y dónde están
-
-- **Estilo:** el de la presentación *React IV – Pruebas Unitarias*: `describe` / `it` / `expect` importados de `vitest`, `render` + `screen` + `fireEvent` de Testing Library, `MemoryRouter` para probar rutas, una prueba = un caso, nombres descriptivos y casos inválidos además de los correctos.
-- **Dónde:** `src/tests/` (16 archivos). `setup.js` simula las APIs que jsdom no tiene (`scrollIntoView`, `scrollTo`, `matchMedia`...).
-- **Cómo:** `npm run test:run` (una vez), `npm test` (observador), `npm run coverage`.
-- `secciones-inicio.test.jsx` comprueba el orden de la página de inicio: testimonios → reservas → … → chefs → horarios y entregas → suscripción.
+- **453 pruebas** en `src/tests/` (20 archivos), con `describe` / `it` / `expect` de Vitest, `render` + `screen` + `fireEvent` de Testing Library y `MemoryRouter` para las rutas.
+- Cubren renderizado, renderizado condicional, props, estado, eventos y flujos completos (compra con pago correcto y con error, panel admin), además de casos inválidos: RUN, correos, tarjetas, precios, stock insuficiente y datos dañados en `localStorage`.
+- Archivos principales: `stock-vitrina-insumos` (vitrina, recetas y trozos), `carrito-stock-y-categorias` (límites del carrito y checkout), `admin-y-paginas` y `admin-insumos-y-rutas` (panel y rutas protegidas), `flujos` (compras completas), `datos-y-migraciones` (localStorage), `reportes-y-ordenes` y las de validaciones.
+- `setup.js` agrega las APIs que jsdom no tiene (`scrollIntoView`, `scrollTo`, `matchMedia`...).

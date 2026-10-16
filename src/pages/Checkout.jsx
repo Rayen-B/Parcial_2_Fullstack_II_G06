@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import CampoTexto from '../components/molecules/CampoTexto';
 import EncabezadoSeccion from '../components/molecules/EncabezadoSeccion';
 import { validarCheckout } from '../utils/validaciones';
-import { formatearVencimiento, simularPago, TARJETA_RECHAZADA } from '../utils/pago';
+import { formatearVencimiento, simularPago } from '../utils/pago';
 import { formatearPrecio } from '../utils/formato';
 import { regionesYComunas } from '../utils/regiones';
 import { crearOrden, descontarStock } from '../services/db';
@@ -86,7 +86,7 @@ export default function Checkout() {
     setAviso('');
     const resultadoSolicitado = e.nativeEvent?.submitter?.value;
     const pago = resultadoSolicitado === 'rechazado'
-      ? { aprobado: false, motivo: 'El pago fue rechazado en esta simulación.' }
+      ? { aprobado: false, motivo: 'El banco rechazó el pago. Revisa los datos o prueba con otro medio de pago.' }
       : resultadoSolicitado === 'aprobado'
         ? { aprobado: true, motivo: '' }
         : simularPago({ metodoPago: datos.metodoPago, numTarjeta: datos.numTarjeta });
@@ -165,13 +165,13 @@ export default function Checkout() {
                   <label className={`payment-method-card${datos.metodoPago === 'tarjeta' ? ' active' : ''}`}>
                     <input type="radio" name="metodoPago" value="tarjeta" checked={datos.metodoPago === 'tarjeta'} onChange={cambiar} />
                     <i className="fas fa-credit-card" aria-hidden="true"></i>
-                    <div><strong>Tarjeta de crédito o débito</strong><span>Pago de demostración con tarjeta.</span></div>
+                    <div><strong>Tarjeta de crédito o débito</strong><span>Visa, Mastercard, Redcompra.</span></div>
                     <i className="fas fa-check-circle payment-method-check" aria-hidden="true"></i>
                   </label>
                   <label className={`payment-method-card${datos.metodoPago === 'transferencia' ? ' active' : ''}`}>
                     <input type="radio" name="metodoPago" value="transferencia" checked={datos.metodoPago === 'transferencia'} onChange={cambiar} />
                     <i className="fas fa-university" aria-hidden="true"></i>
-                    <div><strong>Transferencia bancaria</strong><span>Solicita los datos oficiales al local antes de transferir.</span></div>
+                    <div><strong>Transferencia bancaria</strong><span>Paga desde tu banco.</span></div>
                     <i className="fas fa-check-circle payment-method-check" aria-hidden="true"></i>
                   </label>
                   <label className={`payment-method-card${datos.metodoPago === 'efectivo' ? ' active' : ''}`}>
@@ -183,8 +183,7 @@ export default function Checkout() {
                 </div>
                 {datos.metodoPago === 'tarjeta' && (
                   <div className="row">
-                    <div className="col-12"><CampoTexto id="coTarjeta" name="numTarjeta" label="Número de tarjeta" requerido inputMode="numeric" autoComplete="cc-number" placeholder="4532 0151 1283 0366" value={datos.numTarjeta} onChange={cambiar} onBlur={alSalir} error={errores.numTarjeta} />
-                      <small className="text-muted d-block mb-3">Para simular un pago rechazado usa {TARJETA_RECHAZADA.replace(/(\d{4})/g, '$1 ').trim()}.</small></div>
+                    <div className="col-12"><CampoTexto id="coTarjeta" name="numTarjeta" label="Número de tarjeta" requerido inputMode="numeric" autoComplete="cc-number" placeholder="4532 0151 1283 0366" value={datos.numTarjeta} onChange={cambiar} onBlur={alSalir} error={errores.numTarjeta} /></div>
                     <div className="col-md-6"><CampoTexto id="coVence" name="vencimiento" label="Vencimiento (MM/AA)" requerido placeholder="MM/AA" inputMode="numeric" maxLength={5} autoComplete="cc-exp" value={datos.vencimiento} onChange={cambiar} onBlur={alSalir} error={errores.vencimiento} /></div>
                     <div className="col-md-6"><CampoTexto id="coCvv" name="cvv" type="password" label="CVV" requerido placeholder="123" autoComplete="cc-csc" value={datos.cvv} onChange={cambiar} onBlur={alSalir} error={errores.cvv} /></div>
                   </div>
@@ -192,13 +191,18 @@ export default function Checkout() {
                 {datos.metodoPago === 'transferencia' && (
                   <div className="payment-info" role="status">
                     <strong><i className="fas fa-info-circle me-2" aria-hidden="true"></i>Datos para transferencia</strong>
-                    <p className="mb-0">Esta versión no tiene una cuenta bancaria configurada. Solicita los datos oficiales directamente a la pastelería antes de transferir. En esta demostración no se envía dinero.</p>
+                    <ul className="list-unstyled mb-0 mt-2">
+                      <li><span className="text-muted">Banco:</span> Banco Papita Dulce</li>
+                      <li><span className="text-muted">Cuenta corriente:</span> 00-123-4567-89</li>
+                      <li><span className="text-muted">RUT:</span> 76.543.210-3</li>
+                      <li><span className="text-muted">Comprobante a:</span> pagos@papitadulce.cl</li>
+                    </ul>
                   </div>
                 )}
                 {datos.metodoPago === 'efectivo' && (
                   <div className="payment-info" role="status">
                     <strong><i className="fas fa-hand-holding-usd me-2" aria-hidden="true"></i>Pago en efectivo</strong>
-                    <p className="mb-0">El monto indicado en el resumen se paga al recibir o retirar el pedido. Coordina con la pastelería la entrega; esta demostración solo registra un pedido de prueba.</p>
+                    <p className="mb-0">El monto indicado en el resumen se paga al recibir o retirar el pedido. Te recomendamos tener el monto exacto.</p>
                   </div>
                 )}
               </fieldset>
@@ -219,12 +223,11 @@ export default function Checkout() {
                 <div className="checkout-pay-actions">
                   <button type="submit" name="resultadoPago" value="aprobado" className="btn-red w-100 justify-content-center">
                     <i className="fas fa-lock" aria-hidden="true"></i>
-                    {datos.metodoPago === 'tarjeta' ? `Simular pago con tarjeta ${formatearPrecio(totalPrecio)}` : datos.metodoPago === 'transferencia' ? 'Confirmar transferencia (demostración)' : 'Confirmar pedido en efectivo'}
+                    {datos.metodoPago === 'tarjeta' ? `Pagar ${formatearPrecio(totalPrecio)}` : datos.metodoPago === 'transferencia' ? 'Confirmar transferencia' : 'Confirmar pedido en efectivo'}
                   </button>
                   <button id="simular-error-pago" type="submit" name="resultadoPago" value="rechazado" className="btn checkout-decline w-100">
                     <i className="fas fa-exclamation-circle me-2" aria-hidden="true"></i>Simular error de pago
                   </button>
-                  <small className="text-muted text-center">Modo de demostración: no se realizará ningún cobro ni transferencia real.</small>
                 </div>
               </aside>
             </div>

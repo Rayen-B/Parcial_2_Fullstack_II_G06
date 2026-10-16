@@ -15,10 +15,10 @@ export function formatearVencimiento(valor, eliminar = false) {
   return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
 }
 
-// Número de tarjeta de prueba que el "banco" simulado siempre rechaza (4000 0000 0000 0002, pasa Luhn)
+// Número de tarjeta que el banco siempre rechaza (4000 0000 0000 0002, pasa Luhn)
 export const TARJETA_RECHAZADA = '4000000000000002';
 
-// Simula la respuesta de la pasarela de pago. Solo la tarjeta de prueba de rechazo falla.
+// Respuesta de la pasarela de pago: solo se rechaza la tarjeta TARJETA_RECHAZADA.
 export function simularPago({ metodoPago, numTarjeta = '' }) {
   if (metodoPago === 'tarjeta' && numTarjeta.replace(/\D/g, '') === TARJETA_RECHAZADA) {
     return { aprobado: false, motivo: 'Tu banco rechazó la transacción. Revisa los datos o prueba con otra tarjeta.' };

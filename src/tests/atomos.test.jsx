@@ -21,7 +21,7 @@ describe('Boton', () => {
   });
 
   it('ejecuta onClick al hacer clic', () => {
-    const onClick = vi.fn(); // función simulada
+    const onClick = vi.fn(); // mock
     render(<Boton onClick={onClick}>Guardar</Boton>);
     fireEvent.click(screen.getByText('Guardar'));
     expect(onClick).toHaveBeenCalledTimes(1);

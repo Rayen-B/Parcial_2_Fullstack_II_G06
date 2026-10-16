@@ -7,7 +7,6 @@ import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
 import { TiendaProvider } from '../context/TiendaContext';
 
-// Variables necesarias para comprobar
 const NOMBRES = ['Inicio', 'Nosotros', 'Menú', 'Equipo', 'Reservacion', 'Reseñas', 'Contacto'];
 
 const conProviders = (ui, ruta = '/') => (

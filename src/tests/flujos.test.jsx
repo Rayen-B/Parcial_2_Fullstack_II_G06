@@ -279,7 +279,7 @@ describe('Flujo de compra: checkout, pago correcto y pago con error', () => {
     cargarCarrito([ITEM]);
     const c = renderizar(<Rutas />, { ruta: '/checkout' });
     clic(c.querySelector('input[name="metodoPago"][value="transferencia"]'));
-    expect(textoDe(c).toLowerCase()).toContain('no tiene una cuenta bancaria configurada');
+    expect(textoDe(c)).toContain('Banco Papita Dulce');
     expect(porId(c, 'coTarjeta')).toBeNull();
     clic(c.querySelector('input[name="metodoPago"][value="efectivo"]'));
     expect(textoDe(c)).toContain('El monto indicado en el resumen se paga al recibir o retirar');

@@ -2,7 +2,6 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { CartProvider, useCart } from '../context/CartContext';
 
-// Variables necesarias para comprobar
 const torta = { id: 'TC001', codigo: 'TC001', nombre: 'Torta', precio: 10000, imagen: 'x' };
 const envoltura = ({ children }) => <CartProvider>{children}</CartProvider>;
 const abrirCarrito = () => renderHook(() => useCart(), { wrapper: envoltura });

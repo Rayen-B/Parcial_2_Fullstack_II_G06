@@ -168,7 +168,6 @@ describe('Boletín (suscripción)', () => {
 });
 
 describe('Reservación', () => {
-  // Variables necesarias para comprobar
   const manana = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
   const valida = { nombre: 'Ana Pérez', telefono: '+56 9 1234 5678', correo: 'ana@correo.cl', fecha: manana };
 

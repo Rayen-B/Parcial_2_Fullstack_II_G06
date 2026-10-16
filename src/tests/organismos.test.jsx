@@ -7,7 +7,6 @@ import { AuthProvider } from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
 import { TiendaProvider } from '../context/TiendaContext';
 
-// Variables necesarias para comprobar
 const producto = { codigo: 'TC001', nombre: 'Torta Panqueque', categoria: 'Tortas', precio: 16000, precioAnterior: 0, stock: 5, descripcion: 'Rica torta', imagen: 'menu/Torta_Trufa' };
 
 const conProviders = (ui, ruta = '/') => (

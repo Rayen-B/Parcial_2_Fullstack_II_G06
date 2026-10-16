@@ -1,4 +1,4 @@
-// "Base de datos" simulada de la tienda: archivo de datos con operaciones CRUD (Crear, Leer, Actualizar, Eliminar).
+// Datos de la tienda con operaciones CRUD (Crear, Leer, Actualizar, Eliminar).
 // Los datos se guardan en localStorage a través de services/storage.js, y los componentes de React
 // (tienda y panel admin) los leen desde aquí, así cualquier cambio del admin se ve de inmediato en la tienda.
 import * as storage from './storage';

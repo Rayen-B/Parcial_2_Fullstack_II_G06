@@ -5,7 +5,6 @@ import { useOverlay } from '../hooks/useOverlay';
 import { useSeo } from '../hooks/useSeo';
 import { useEstilos } from '../hooks/useEstilos';
 
-// Variables necesarias para comprobar
 const inicial = { nombre: '' };
 const validar = (v) => (v.nombre ? {} : { nombre: 'El nombre es requerido' });
 const evento = (name, value) => ({ target: { name, value }, preventDefault: () => {} });
