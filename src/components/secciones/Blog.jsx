@@ -1,39 +1,50 @@
 import React from 'react';
-import images from '../../assets/images';
+import { Link } from 'react-router-dom';
+import { listarArticulos } from '../../services/db';
+import { obtenerImagen } from '../../assets/images';
 
-const ARTICULOS = [
-  { img: images['menu/Torta_Panqueque_Naranja'], dia: '14', mes: 'Mar', tag: 'Secreto de reposteria', titulo: '¿Pastelería sin culpas? Cómo logramos el equilibrio entre lo dulce y lo fresco.', autor: 'Casimiro Mirón', comentarios: 24, delay: 0 },
-  { img: images['menu/Sandwich1'], dia: '28', mes: 'Feb', tag: 'Ciencia de los alimentos', titulo: '¿Se está volviendo más saludable la comida rápida? Esto es lo que descubrimos.', autor: 'Pepe Nillo', comentarios: 18, delay: 80 },
-  { img: images['menu/Postre2'], dia: '05', mes: 'Jun', tag: 'Recetas', titulo: 'Innovadora receta casera de crujientes merengues', autor: 'Chef Elena Tilla', comentarios: 32, delay: 160 }
-];
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-export default function Blog() {
+export function partesFecha(fechaISO) {
+  const [, mes, dia] = String(fechaISO).split('-');
+  return { dia: dia || '', mes: MESES[Number(mes) - 1] || '' };
+}
+
+// Tarjetas del blog. limite: cantidad de artículos a mostrar (todos si no se indica)
+export default function Blog({ limite, mostrarEncabezado = true, conVerTodos = false }) {
+  const articulos = listarArticulos().slice(0, limite);
   return (
-    <section id="blog">
+    <section id="blog" aria-labelledby="tituloBlog">
       <div className="container">
-        <div className="text-center mb-5" data-aos="fade-up">
-          <span className="slbl">Noticias &amp; Actualizaciones</span>
-          <h2 className="stitle">Nuestros últimos <span>artículos</span> del blog</h2>
-          <div className="sline"></div>
-        </div>
+        {mostrarEncabezado && (
+          <div className="text-center mb-5" data-aos="fade-up">
+            <span className="slbl">Noticias &amp; Actualizaciones</span>
+            <h2 className="stitle" id="tituloBlog">Nuestros últimos <span>artículos</span> del blog</h2>
+            <div className="sline"></div>
+          </div>
+        )}
         <div className="row g-4">
-          {ARTICULOS.map((a) => (
-            <div className="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay={a.delay} key={a.titulo}>
-              <div className="blcard">
-                <div className="blimg">
-                  <img src={a.img} alt="" />
-                  <div className="bldatebdg"><span className="bd">{a.dia}</span><span className="bm">{a.mes}</span></div>
-                </div>
-                <div className="blbody">
-                  <div className="bltag">{a.tag}</div>
-                  <div className="bltit"><a href="#">{a.titulo}</a></div>
-                  <div className="blmeta"><span><i className="fas fa-user"></i>{a.autor}</span><span><i className="fas fa-comment"></i>{a.comentarios} comentarios</span></div>
-                  <a href="#" className="blmore">Leer más <i className="fas fa-arrow-right"></i></a>
-                </div>
+          {articulos.map((a, i) => {
+            const { dia, mes } = partesFecha(a.fecha);
+            return (
+              <div className="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay={i * 80} key={a.id}>
+                <article className="blcard">
+                  <div className="blimg">
+                    <img src={obtenerImagen(a.imagen)} alt={a.titulo} loading="lazy" />
+                    <div className="bldatebdg"><span className="bd">{dia}</span><span className="bm">{mes}</span></div>
+                  </div>
+                  <div className="blbody">
+                    <div className="bltag">{a.categoria}</div>
+                    <h3 className="bltit"><Link to={`/blog/${a.id}`}>{a.titulo}</Link></h3>
+                    <div className="blmeta"><span><i className="fas fa-user"></i>{a.autor}</span><span><i className="fas fa-comment"></i>{a.comentarios} comentarios</span></div>
+                    <Link to={`/blog/${a.id}`} className="blmore">Leer más <i className="fas fa-arrow-right"></i></Link>
+                  </div>
+                </article>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+        {conVerTodos && <div className="text-center mt-5"><Link to="/blog" className="btn-red"><i className="fas fa-newspaper"></i>Ver todos los artículos</Link></div>}
       </div>
     </section>
   );

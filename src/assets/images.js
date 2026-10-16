@@ -16,11 +16,18 @@ export default images;
 
 // Devuelve la URL de una imagen a partir de su clave o de una ruta guardada
 export function obtenerImagen(ruta) {
-  if (!ruta) return images['favicon_io/Logo_Papita_Dulce'];
+  if (!ruta) return images.imgc1;
   if (/^(data:|https?:|blob:)/.test(ruta)) return ruta;
   const clave = ruta
     .replace(/^(\.\.\/|\/)+/, '')
     .replace(/^(papitadulce\/img\/|assets\/images\/|img\/)/, '')
     .replace(/\.[^/.]+$/, '');
-  return images[clave] || images[ruta] || ruta;
+  const directa = images[clave] || images[ruta];
+  if (directa) return directa;
+
+  const claveMinuscula = clave.toLowerCase();
+  const claveCompatible = Object.keys(images).find((nombre) =>
+    nombre.toLowerCase() === claveMinuscula || nombre.toLowerCase().startsWith(`${claveMinuscula}.`)
+  );
+  return (claveCompatible && images[claveCompatible]) || images.imgc1;
 }

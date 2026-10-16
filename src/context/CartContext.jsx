@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { obtenerCarrito, guardarCarrito } from '../services/storage';
+import { FACTOR_TROZO } from '../utils/stock';
 
 const CartContext = createContext();
 
@@ -28,6 +29,7 @@ export function CartProvider({ children }) {
         {
           id: producto.id || producto.codigo,
           codigo: producto.codigo,
+          factor: variante === 'trozo' ? FACTOR_TROZO : 1,
           nombre: producto.nombre,
           precio: variante === 'trozo' ? Math.round(producto.precio * 0.25) : producto.precio,
           imagen: producto.imagen,
@@ -40,7 +42,7 @@ export function CartProvider({ children }) {
 
   // Agrega un ítem ya armado 
   // Si el mismo producto/variante ya está en el carrito, solo suma la cantidad.
-  const agregarItem = ({ id, nombre, precio, imagen }, cantidad = 1) => {
+  const agregarItem = ({ id, codigo, factor = 1, nombre, precio, imagen }, cantidad = 1) => {
     setCarrito((prev) => {
       const existe = prev.some((item) => item.id === id);
       if (existe) {
@@ -48,7 +50,7 @@ export function CartProvider({ children }) {
           item.id === id ? { ...item, cantidad: item.cantidad + cantidad } : item
         );
       }
-      return [...prev, { id, nombre, precio, imagen, variante: '', cantidad }];
+      return [...prev, { id, codigo, factor, nombre, precio, imagen, variante: '', cantidad }];
     });
   };
 

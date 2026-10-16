@@ -499,6 +499,12 @@ body {
     background-color: #ffffff;
 }
 
+/* Espacio a la derecha para la flecha del select */
+.form-select {
+    padding-right: 36px;
+    background-position: right 12px center;
+}
+
 .form-control:focus, .form-select:focus {
     border-color: var(--color-primario);
     box-shadow: 0 0 0 3px rgba(255, 161, 40, 0.2);

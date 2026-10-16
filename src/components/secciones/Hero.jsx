@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import images from '../../assets/images';
 
 const ESTADISTICAS = [
@@ -62,7 +63,7 @@ export default function Hero({ onVerHistoria }) {
               <h1 className="htitle">Delicioso <span className="hl">"Creado para despertar a tu Papita interior"</span><br />{'\n'}para cada momento</h1>
               <p className="hdesc">Ese lado tierno y relajado que sabe disfrutar de las cosas buenas de la vida,un trozo de pastel y un sorbo de café a la vez.</p>
               <div className="d-flex flex-wrap gap-3 mb-2">
-                <a href="#menu" className="btn-red"><i className="fas fa-utensils"></i>Explorar menú</a>
+                <Link to="/productos" className="btn-red"><i className="fas fa-utensils"></i>Explorar productos</Link>
                 <a
                   href={images['Historia']}
                   className="magnific_popup btn-play"

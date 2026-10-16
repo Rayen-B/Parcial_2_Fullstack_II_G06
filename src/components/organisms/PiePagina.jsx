@@ -1,15 +1,15 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { listarCategorias } from '../../services/db';
 
 const ENLACES_RAPIDOS = [
-  { href: '#hero', texto: 'Inicio' },
-  { href: '#about', texto: 'Sobre nosotros' },
-  { href: '#menu', texto: 'Nuestro menú' },
-  { href: '#reservation', texto: 'Reservacion' },
-  { href: '#blog', texto: 'Blog' },
-  { href: '#contact-section', texto: 'Contacto' }
+  { to: '/', texto: 'Inicio' },
+  { to: '/nosotros', texto: 'Sobre nosotros' },
+  { to: '/productos', texto: 'Nuestros productos' },
+  { to: '/ofertas', texto: 'Ofertas' },
+  { to: '/blog', texto: 'Blog' },
+  { to: '/contacto', texto: 'Contacto' }
 ];
-
-const CATEGORIAS_MENU = ['Tortas', 'Infusiones & bebestibles', 'Sándwiches', 'Tartaletas', 'Postres'];
 
 const CONTACTO = [
   { icono: 'fa-map-marker-alt', titulo: 'Dirección', texto: 'Av. Papita Dulce, Santiago, Chile' },
@@ -19,6 +19,7 @@ const CONTACTO = [
 ];
 
 export default function PiePagina() {
+  const categorias = listarCategorias();
   return (
     <footer>
       <div className="container">
@@ -27,26 +28,26 @@ export default function PiePagina() {
             <div className="fnm">Papita<span>Dulce</span></div>
             <p className="fdesc">Reunimos los mejores sabores del mundo en una experiencia rápida, amable y asequible. Cada comida está elaborada con amor.</p>
             <div className="fsoc">
-              <a href="#"><i className="fab fa-facebook-f"></i></a>
-              <a href="#"><i className="fab fa-instagram"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
-              <a href="#"><i className="fab fa-youtube"></i></a>
-              <a href="#"><i className="fab fa-tiktok"></i></a>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-facebook-f"></i></a>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-instagram"></i></a>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-twitter"></i></a>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-youtube"></i></a>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-tiktok"></i></a>
             </div>
           </div>
           <div className="col-sm-6 col-lg-2">
             <div className="ftit">Enlaces rápidos</div>
             <ul className="flinks ps-0">
               {ENLACES_RAPIDOS.map((e) => (
-                <li key={e.href}><a href={e.href}><i className="fas fa-chevron-right"></i>{e.texto}</a></li>
+                <li key={e.to}><Link to={e.to}><i className="fas fa-chevron-right"></i>{e.texto}</Link></li>
               ))}
             </ul>
           </div>
           <div className="col-sm-6 col-lg-2">
             <div className="ftit">Nuestro menú</div>
             <ul className="flinks ps-0">
-              {CATEGORIAS_MENU.map((c) => (
-                <li key={c}><a href="#menu"><i className="fas fa-chevron-right"></i>{c}</a></li>
+              {categorias.map((c) => (
+                <li key={c.id}><Link to={`/categorias/${c.id}`}><i className="fas fa-chevron-right"></i>{c.nombre}</Link></li>
               ))}
             </ul>
           </div>
@@ -65,7 +66,7 @@ export default function PiePagina() {
         <div className="container">
           <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <p>&copy; 2026 <span>Papita Dulce</span>. Todos los derechos reservados. Hecho con <span><i className="fas fa-heart"></i></span></p>
-            <div><a href="#">Política de privacidad</a><a href="#">Terminos</a><a href="#">Cookies</a></div>
+            <div><Link to="/contacto">Política de privacidad</Link><Link to="/contacto">Términos</Link><Link to="/contacto">Cookies</Link></div>
           </div>
         </div>
       </div>

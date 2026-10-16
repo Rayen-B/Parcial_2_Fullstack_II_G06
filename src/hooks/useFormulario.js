@@ -1,32 +1,63 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Estado, validación y envío de los formularios de reserva y contacto. validar() devuelve { campo: mensaje }
+// Estado, validación y envío de los formularios de reserva y contacto.
+// validar(valores) devuelve { campo: mensaje } solo con los campos inválidos.
+//  - cambiar: actualiza el valor y, si el campo ya fue tocado o tenía error, lo revalida en vivo.
+//  - alSalir (onBlur): valida el campo apenas el usuario lo abandona.
+//  - alEnviar(alTerminar) devuelve el handler del onSubmit: valida TODO el formulario antes de enviar.
 export function useFormulario(valoresIniciales, validar) {
   const [valores, setValores] = useState(valoresIniciales);
   const [errores, setErrores] = useState({});
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const tocados = useRef({});
   const timer = useRef(null);
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const cambiar = (e) => {
+  const cambiar = useCallback((e) => {
     const { name, value } = e.target;
-    setValores((prev) => ({ ...prev, [name]: value }));
-    if (errores[name]) setErrores((prev) => ({ ...prev, [name]: undefined }));
-  };
+    setEnviado(false);
+    setValores((prev) => {
+      const nuevos = { ...prev, [name]: value };
+      if (tocados.current[name]) {
+        const mensaje = validar(nuevos)[name];
+        setErrores((errs) => ({ ...errs, [name]: mensaje }));
+      }
+      return nuevos;
+    });
+  }, [validar]);
 
-  const enviar = (alTerminar) => {
-    const nuevosErrores = validar(valores);
+  const alSalir = useCallback((e) => {
+    const { name } = e.target;
+    tocados.current[name] = true;
+    setErrores((errs) => ({ ...errs, [name]: validar(valoresRef.current)[name] }));
+  }, [validar]);
+
+  // copia siempre actualizada de los valores (para validar dentro de onBlur)
+  const valoresRef = useRef(valores);
+  valoresRef.current = valores;
+
+  const enviar = useCallback((alTerminar) => {
+    const nuevosErrores = validar(valoresRef.current);
     setErrores(nuevosErrores);
-    if (Object.values(nuevosErrores).some(Boolean)) return;
+    Object.keys(valoresRef.current).forEach((campo) => { tocados.current[campo] = true; });
+    if (Object.values(nuevosErrores).some(Boolean)) return false;
     setEnviando(true);
     timer.current = setTimeout(() => {
       setEnviando(false);
       setEnviado(true);
+      setValores(valoresIniciales);
+      tocados.current = {};
       if (alTerminar) alTerminar();
     }, 1500);
-  };
+    return true;
+  }, [validar, valoresIniciales]);
 
-  return { valores, errores, enviando, enviado, cambiar, enviar };
+  const alEnviar = useCallback((alTerminar) => (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    enviar(alTerminar);
+  }, [enviar]);
+
+  return { valores, errores, enviando, enviado, cambiar, alSalir, enviar, alEnviar };
 }

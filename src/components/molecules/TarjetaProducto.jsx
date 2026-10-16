@@ -1,42 +1,46 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { obtenerImagen } from '../../assets/images';
+import { descuentoPorcentaje, esOferta } from '../../services/db';
+import { formatearPrecio } from '../../utils/formato';
 
-// Tarjeta de producto del menú. favorito: null si nunca se marcó el corazón
-export default function TarjetaProducto({ producto, favorito = null, onToggleFavorito, onAbrir }) {
-  const handleCorazon = (e) => {
-    e.stopPropagation(); // el corazón no abre el popup
-    if (onToggleFavorito) onToggleFavorito();
-  };
+// Tarjeta de producto del catálogo. Recibe un producto de la base de datos (services/db.js).
+//  - producto: { codigo, nombre, categoria, precio, precioAnterior, stock, imagen, descripcion }
+//  - disponible: unidades enteras que se pueden vender (vitrina + preparables); por defecto el stock
+//  - hayTrozos: si quedan trozos aunque no haya tortas enteras
+//  - onAgregar(producto): se llama al presionar "Agregar" (si no se entrega, el botón no se muestra)
+export default function TarjetaProducto({ producto, disponible = Number(producto.stock), hayTrozos = false, onAgregar }) {
+  const descuento = descuentoPorcentaje(producto);
+  const sinEnteras = disponible <= 0;
+  const agotado = sinEnteras && !hayTrozos;
+  const urlDetalle = `/producto/${producto.codigo}`;
 
   return (
-    <div className="mcard" onClick={onAbrir}>
-      <div className="mimg">
-        <img src={obtenerImagen(producto.img)} alt={producto.alt || producto.title} />
-        {producto.badgeText && (
-          <div className={`mbdg${producto.badgeType ? ' ' + producto.badgeType : ''}`}><i className="fas fa-star"></i> {producto.badgeText}</div>
-        )}
-        <div
-          className="mhrt"
-          style={favorito === null ? undefined : { color: favorito ? 'var(--primary)' : '#ccc' }}
-          onClick={handleCorazon}
-        >
-          <i className={favorito ? 'fas fa-heart' : 'far fa-heart'}></i>
-        </div>
-      </div>
+    <article className="mcard">
+      <Link to={urlDetalle} className="mimg d-block" aria-label={`Ver detalle de ${producto.nombre}`}>
+        <img src={obtenerImagen(producto.imagen)} alt={producto.nombre} loading="lazy" />
+        {esOferta(producto) && <div className="mbdg hot"><i className="fas fa-tag"></i> -{descuento}%</div>}
+        {agotado && <div className="mbdg new">Agotado</div>}
+        {sinEnteras && hayTrozos && <div className="mbdg new">Solo por trozo</div>}
+      </Link>
       <div className="mbody">
-        <div className="mcat">{producto.catTarjeta || producto.cat}</div>
-        <div className="mtit">{producto.nombre || producto.title}</div>
-        <div className="mdesc">{producto.shortDesc}</div>
-        <div className="mfoot">
-          <div>
-            <div className="mprice">
-              {producto.price}
-              {producto.old && !producto.ocultarAnteriorEnTarjeta && <> <small>{producto.old}</small></>}
-            </div>
-            <div className="mstars"><i className="fas fa-star"></i> <span className="text-light-gray text-xs">({producto.reviewsShown})</span></div>
+        <div className="mcat">{producto.categoria}</div>
+        <h3 className="mtit"><Link to={urlDetalle} className="text-reset text-decoration-none">{producto.nombre}</Link></h3>
+        <div className="mdesc">{producto.descripcion}</div>
+        <div className="mfoot d-flex justify-content-between align-items-center gap-2">
+          <div className="mprice">
+            {formatearPrecio(producto.precio)}
+            {descuento > 0 && <> <small>{formatearPrecio(producto.precioAnterior)}</small></>}
           </div>
+          {onAgregar && (sinEnteras && hayTrozos ? (
+            <Link to={urlDetalle} className="btn-red btn-sm"><i className="fas fa-birthday-cake"></i>Ver trozos</Link>
+          ) : (
+            <button type="button" className="btn-red btn-sm" disabled={agotado} onClick={() => onAgregar(producto)} aria-label={`Agregar ${producto.nombre} al carrito`}>
+              <i className="fas fa-shopping-bag"></i>{agotado ? 'Sin stock' : 'Agregar'}
+            </button>
+          ))}
         </div>
       </div>
-    </div>
+    </article>
   );
 }

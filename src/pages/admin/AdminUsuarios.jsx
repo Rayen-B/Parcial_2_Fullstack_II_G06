@@ -188,7 +188,7 @@ export default function AdminUsuarios() {
               </div>
             </div>
             <div className="modal-footer bg-light border-0 py-2">
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setMostrarFicha(false)}>Cerrar</button>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setMostrarFicha(false)}><i className="ti ti-x me-1"></i> Cerrar</button>
               <Link id="modal-usr-btn-editar" to={`/admin/usuario-form?run=${usuarioModal.run || ''}`} className="btn btn-pasteleria btn-sm solo-admin" style={ocultarSoloAdmin}>
                 <i className="ti ti-edit me-1"></i> Ir a Editar
               </Link>
@@ -208,7 +208,7 @@ export default function AdminUsuarios() {
             ¿Estás seguro de que deseas eliminar al usuario <b>{usuarioAEliminar ? nombreCompleto(usuarioAEliminar) : ''}</b> (RUN: <code>{usuarioAEliminar ? usuarioAEliminar.run : ''}</code>)? Esta acción no se puede deshacer.
           </p>
           <div className="d-flex justify-content-center gap-2">
-            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setMostrarEliminar(false)}>Cancelar</button>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setMostrarEliminar(false)}><i className="ti ti-x me-1"></i> Cancelar</button>
             <button type="button" className="btn btn-danger btn-sm" id="btn-confirmar-eliminar-definitivo" onClick={confirmarEliminar}>
               <i className="ti ti-trash me-1"></i> Eliminar
             </button>

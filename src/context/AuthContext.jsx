@@ -6,7 +6,6 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(() => obtenerSesionActiva());
   const [usuariosDB, setUsuariosDB] = useState(() => obtenerUsuarios());
-  const [mostrarModalAuth, setMostrarModalAuth] = useState(false);
 
   useEffect(() => {
     guardarSesionActiva(usuario);
@@ -16,16 +15,17 @@ export function AuthProvider({ children }) {
     guardarUsuarios(usuariosDB);
   }, [usuariosDB]);
 
-  const iniciarSesion = (correo, password) => {
-    const correoNormalizado = String(correo || '').trim().toLowerCase();
+  // El identificador puede ser el correo o el nombre de usuario (ej: "admin")
+  const iniciarSesion = (identificador, password) => {
+    const id = String(identificador || '').trim().toLowerCase();
     const usr = usuariosDB.find(
-      (u) => u.correo.toLowerCase() === correoNormalizado && u.password === password
+      (u) => (u.correo.toLowerCase() === id || (u.usuario && u.usuario.toLowerCase() === id)) && u.password === password
     );
     if (usr) {
       setUsuario(usr);
       return { exito: true, usuario: usr };
     }
-    return { exito: false, mensaje: "Correo o contraseña incorrectos." };
+    return { exito: false, mensaje: "Usuario o contraseña incorrectos." };
   };
 
   // Recuperación de contraseña: verifica que el correo esté registrado
@@ -37,8 +37,22 @@ export function AuthProvider({ children }) {
     }
     return {
       exito: true,
-      mensaje: 'Se enviara un correo a '+  usr.correo 
+      mensaje: 'Te enviamos instrucciones de recuperación a ' + usr.correo 
     };
+  };
+
+  // "Mi Perfil": actualiza los datos del usuario conectado en la sesión y en la lista de usuarios
+  const actualizarPerfil = (cambios) => {
+    if (!usuario) return { exito: false, mensaje: 'No hay una sesión iniciada.' };
+    const correoNuevo = String(cambios.correo || usuario.correo).trim().toLowerCase();
+    const esElMismo = (u) => (usuario.run && u.run ? u.run === usuario.run : u.correo.toLowerCase() === usuario.correo.toLowerCase());
+    if (usuariosDB.some((u) => !esElMismo(u) && u.correo.toLowerCase() === correoNuevo)) {
+      return { exito: false, mensaje: 'Ese correo ya está registrado por otro usuario.' };
+    }
+    const actualizado = { ...usuario, ...cambios, correo: correoNuevo };
+    setUsuariosDB(usuariosDB.map((u) => (esElMismo(u) ? { ...u, ...cambios, correo: correoNuevo } : u)));
+    setUsuario(actualizado);
+    return { exito: true, usuario: actualizado };
   };
 
   const cerrarSesion = () => {
@@ -79,8 +93,7 @@ export function AuthProvider({ children }) {
         cambiarRolActivo,
         registrarUsuario,
         solicitarRecuperacion,
-        mostrarModalAuth,
-        setMostrarModalAuth
+        actualizarPerfil
       }}
     >
       {children}

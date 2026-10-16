@@ -1,11 +1,14 @@
+import { RECETAS_DEFAULT } from '../data/recetas';
+import { ARTICULOS_DEFAULT } from '../data/blog';
 
 export const PRODUCTOS_KEY = 'pasteleria_productos_db';
 export const USERS_KEY = 'tienda_usuarios_db';
 export const AUTH_KEY = 'tienda_usuario_sesion';
 export const CART_KEY = 'papita_dulce_cart';
 export const ORDERS_KEY = 'papita_dulce_orders';
+export const BLOG_KEY = 'papita_dulce_blog';
 
-export const PRODUCTOS_DEFAULT = [
+const CATALOGO_BASE = [
   // TORTAS
   {
     id: "TC001",
@@ -62,7 +65,7 @@ export const PRODUCTOS_DEFAULT = [
     categoria: "Tortas",
     precio: 16500,
     precioAnterior: 19000,
-    stock: 7,
+    stock: 3,
     stockCritico: 3,
     imagen: "menu/Torta_San_Jorge.jpg",
     descripcion: "Torta casera de textura suave y sabor tradicional para compartir."
@@ -222,7 +225,7 @@ export const PRODUCTOS_DEFAULT = [
     categoria: "Sándwiches",
     precio: 1800,
     precioAnterior: 2400,
-    stock: 10,
+    stock: 2,
     stockCritico: 3,
     imagen: "menu/Sandwich1",
     descripcion: "Pan ciabatta crujiente con vegetales asados, rúcula fresca y ricotta."
@@ -246,7 +249,7 @@ export const PRODUCTOS_DEFAULT = [
     categoria: "Sándwiches",
     precio: 2600,
     precioAnterior: 3200,
-    stock: 9,
+    stock: 2,
     stockCritico: 3,
     imagen: "menu/Sandwich5",
     descripcion: "Sándwich artesanal con tofu salteado con especias y ensalada abundante."
@@ -284,7 +287,7 @@ export const PRODUCTOS_DEFAULT = [
     categoria: "Tartaletas",
     precio: 3700,
     precioAnterior: 4400,
-    stock: 8,
+    stock: 2,
     stockCritico: 3,
     imagen: "menu/tartaleta3",
     descripcion: "Tartaleta artesanal con crema suave de naranja y merengue italiano flameado."
@@ -370,7 +373,7 @@ export const PRODUCTOS_DEFAULT = [
     categoria: "Postres",
     precio: 3500,
     precioAnterior: 4100,
-    stock: 14,
+    stock: 0,
     stockCritico: 4,
     imagen: "menu/postre4",
     descripcion: "Postre de chocolate con nueces y una presentación delicada."
@@ -437,13 +440,35 @@ export const PRODUCTOS_DEFAULT = [
   }
 ];
 
+// Cada producto lleva su receta (vacía si se vende solo desde la vitrina)
+export const PRODUCTOS_DEFAULT = CATALOGO_BASE.map((p) => ({ ...p, receta: RECETAS_DEFAULT[p.codigo] || [] }));
+
 // Al cambiar la versión se agregan al localStorage los productos nuevos del catálogo
-export const CATALOGO_VERSION = '2';
+export const CATALOGO_VERSION = '6';
 const CATALOGO_VERSION_KEY = 'papita_catalogo_version';
+
+// Stock que tenían antes estos productos: si no se ha editado, se actualiza al nuevo stock del catálogo
+const STOCK_ANTERIOR = { SAN002: [10], TAR002: [8, 3], POS006: [14], TS005: [7], SAN004: [9] };
+
+// "Infusiones & Bebestibles" se separó otra vez en Bebestibles e Infusiones
+const CATEGORIA_COMBINADA = 'Infusiones & Bebestibles';
 
 export const USUARIOS_DEFAULT = [
   {
-    run: "19011022K",
+    // Acceso rápido para la evaluación: usuario "admin" / contraseña "admin" → panel de administración
+    run: "111111111",
+    usuario: "admin",
+    nombre: "Admin",
+    apellidos: "Papita Dulce",
+    correo: "admin@papitadulce.cl",
+    password: "admin",
+    rol: "Administrador",
+    region: "Región Metropolitana de Santiago",
+    comuna: "Santiago",
+    direccion: "Av. Papita Dulce 100"
+  },
+  {
+    run: "190110222",
     nombre: "Alan",
     apellidos: "Brito Delgado",
     correo: "alan.brito@duoc.cl",
@@ -454,7 +479,7 @@ export const USUARIOS_DEFAULT = [
     direccion: "Av. España 123"
   },
   {
-    run: "184561234",
+    run: "184561239",
     nombre: "Lola",
     apellidos: "Mento Rojas",
     correo: "lola.mento@profesor.duoc.cl",
@@ -465,7 +490,7 @@ export const USUARIOS_DEFAULT = [
     direccion: "Av. Providencia 456"
   },
   {
-    run: "201239875",
+    run: "201239877",
     nombre: "Armando",
     apellidos: "Esteban Quito",
     correo: "armando.quito@gmail.com",
@@ -487,7 +512,13 @@ export const ORDENES_DEFAULT = [
     estado: "Enviado",
     montoTotal: "$45.000",
     total: 45000,
-    items: "1x Torta Selva Negra ($45.000)"
+    items: "1x Torta Selva Negra ($45.000)",
+    hora: "11:24",
+    telefono: "+56 9 8765 4321",
+    tipoEntrega: "despacho",
+    entrega: "Av. España 123, Santiago",
+    metodoPago: "tarjeta",
+    detalle: [{ nombre: "Torta Selva Negra", cantidad: 1, precio: 45000 }]
   },
   {
     id: "ORD-1002",
@@ -498,7 +529,13 @@ export const ORDENES_DEFAULT = [
     estado: "Pendiente",
     montoTotal: "$38.000",
     total: 38000,
-    items: "1x Torta Panqueque de Naranja ($38.000)"
+    items: "1x Torta Panqueque de Naranja ($38.000)",
+    hora: "16:05",
+    telefono: "+56 9 7654 3210",
+    tipoEntrega: "despacho",
+    entrega: "Av. Providencia 456, Providencia",
+    metodoPago: "transferencia",
+    detalle: [{ nombre: "Torta Panqueque de Naranja", cantidad: 1, precio: 38000 }]
   },
   {
     id: "ORD-1003",
@@ -509,7 +546,13 @@ export const ORDENES_DEFAULT = [
     estado: "Cancelado",
     montoTotal: "$25.000",
     total: 25000,
-    items: "1x Empolvados ($25.000)"
+    items: "1x Empolvados ($25.000)",
+    hora: "10:40",
+    telefono: "+56 9 6543 2109",
+    tipoEntrega: "retiro",
+    entrega: "Retiro en tienda",
+    metodoPago: "efectivo",
+    detalle: [{ nombre: "Empolvados", cantidad: 1, precio: 25000 }]
   },
   {
     id: "ORD-1004",
@@ -520,7 +563,13 @@ export const ORDENES_DEFAULT = [
     estado: "Procesando",
     montoTotal: "$42.000",
     total: 42000,
-    items: "1x Torta de Trufa ($42.000)"
+    items: "1x Torta de Trufa ($42.000)",
+    hora: "18:32",
+    telefono: "+56 9 5432 1098",
+    tipoEntrega: "retiro",
+    entrega: "Retiro en tienda",
+    metodoPago: "tarjeta",
+    detalle: [{ nombre: "Torta de Trufa", cantidad: 1, precio: 42000 }]
   },
   {
     id: "ORD-1005",
@@ -531,7 +580,13 @@ export const ORDENES_DEFAULT = [
     estado: "Enviado",
     montoTotal: "$36.000",
     total: 36000,
-    items: "1x Torta Tres Leches ($36.000)"
+    items: "1x Torta Tres Leches ($36.000)",
+    hora: "13:15",
+    telefono: "+56 9 4321 0987",
+    tipoEntrega: "despacho",
+    entrega: "Los Aromos 789, Ñuñoa",
+    metodoPago: "tarjeta",
+    detalle: [{ nombre: "Torta Tres Leches", cantidad: 1, precio: 36000 }]
   }
 ];
 
@@ -553,7 +608,13 @@ export function obtenerProductos() {
     if (localStorage.getItem(CATALOGO_VERSION_KEY) !== CATALOGO_VERSION) {
       const codigos = new Set(list.map(p => p.codigo));
       const nuevos = PRODUCTOS_DEFAULT.filter(p => !codigos.has(p.codigo));
-      const merged = [...list, ...nuevos];
+      const merged = [...list, ...nuevos].map(p => {
+        const base = PRODUCTOS_DEFAULT.find(d => d.codigo === p.codigo);
+        const stock = base && (STOCK_ANTERIOR[p.codigo] || []).includes(p.stock) ? base.stock : p.stock;
+        const receta = Array.isArray(p.receta) ? p.receta : (base ? base.receta : []);
+        const categoria = p.categoria === CATEGORIA_COMBINADA ? (base ? base.categoria : 'Bebestibles') : p.categoria;
+        return { ...p, stock, receta, categoria };
+      });
       localStorage.setItem(PRODUCTOS_KEY, JSON.stringify(merged));
       localStorage.setItem(CATALOGO_VERSION_KEY, CATALOGO_VERSION);
       return merged;
@@ -568,7 +629,11 @@ export function guardarProductos(productos) {
   localStorage.setItem(PRODUCTOS_KEY, JSON.stringify(productos));
 }
 
-// Obtener o Inicializar Usuarios
+// RUN de los usuarios de ejemplo guardados antes con el dígito verificador equivocado
+const RUN_CORREGIDOS = { "19011022K": "190110222", "184561234": "184561239", "201239875": "201239877" };
+
+// Obtener o Inicializar Usuarios.
+// Si el navegador ya tenía usuarios guardados de una versión anterior, se agrega el usuario "admin" si falta.
 export function obtenerUsuarios() {
   const data = localStorage.getItem(USERS_KEY);
   if (!data) {
@@ -576,7 +641,15 @@ export function obtenerUsuarios() {
     return USUARIOS_DEFAULT;
   }
   try {
-    return JSON.parse(data);
+    const lista = JSON.parse(data);
+    if (!Array.isArray(lista)) return USUARIOS_DEFAULT;
+    const corregida = lista.map((u) => ({ ...u, run: RUN_CORREGIDOS[u.run] || u.run }));
+    if (!corregida.some((u) => u.usuario === 'admin')) {
+      const conAdmin = [USUARIOS_DEFAULT[0], ...corregida];
+      localStorage.setItem(USERS_KEY, JSON.stringify(conAdmin));
+      return conAdmin;
+    }
+    return corregida;
   } catch {
     return USUARIOS_DEFAULT;
   }
@@ -591,7 +664,8 @@ export function obtenerSesionActiva() {
   const data = localStorage.getItem(AUTH_KEY);
   if (!data) return null;
   try {
-    return JSON.parse(data);
+    const usuario = JSON.parse(data);
+    return usuario && RUN_CORREGIDOS[usuario.run] ? { ...usuario, run: RUN_CORREGIDOS[usuario.run] } : usuario;
   } catch {
     return null;
   }
@@ -628,7 +702,9 @@ export function obtenerOrdenes() {
     return ORDENES_DEFAULT;
   }
   try {
-    return JSON.parse(data);
+    // Completa los campos que faltan en las órdenes de ejemplo guardadas antes
+    const porId = Object.fromEntries(ORDENES_DEFAULT.map((o) => [o.id, o]));
+    return JSON.parse(data).map((o) => ({ ...(porId[o.id] || {}), ...o }));
   } catch {
     return ORDENES_DEFAULT;
   }
@@ -636,4 +712,26 @@ export function obtenerOrdenes() {
 
 export function guardarOrdenes(ordenes) {
   localStorage.setItem(ORDERS_KEY, JSON.stringify(ordenes));
+}
+
+// Categorías: se guardan desde services/categorias.js (panel admin) y la tienda las lee desde aquí
+export { CATEGORIAS_KEY, CATEGORIAS_DEFAULT, obtenerCategorias, guardarCategorias } from './categorias';
+
+// Artículos del blog
+export function obtenerArticulos() {
+  const data = localStorage.getItem(BLOG_KEY);
+  if (!data) {
+    localStorage.setItem(BLOG_KEY, JSON.stringify(ARTICULOS_DEFAULT));
+    return ARTICULOS_DEFAULT;
+  }
+  try {
+    const lista = JSON.parse(data);
+    return Array.isArray(lista) ? lista : ARTICULOS_DEFAULT;
+  } catch {
+    return ARTICULOS_DEFAULT;
+  }
+}
+
+export function guardarArticulos(articulos) {
+  localStorage.setItem(BLOG_KEY, JSON.stringify(articulos));
 }

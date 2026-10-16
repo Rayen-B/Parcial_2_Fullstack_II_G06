@@ -1,6 +1,6 @@
 // Da formato de precio chileno 3200 a "$3.200" 
 export function formatearPrecio(valor) {
-  return '$' + Number(valor).toLocaleString('es-CL');
+  return '$' + (Number(valor) || 0).toLocaleString('es-CL');
 }
 
 // Convierte un precio en texto ("$16.900") a número (16900)

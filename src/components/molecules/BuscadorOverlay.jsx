@@ -1,47 +1,18 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTienda } from '../../context/TiendaContext';
 import { useOverlay } from '../../hooks/useOverlay';
-import images from '../../assets/images';
+import { listarCategorias, buscarProductos } from '../../services/db';
+import { obtenerImagen } from '../../assets/images';
 
-const CATEGORIAS = [
-  { cat: 'all', img: images['imgc1'], alt: 'Todas las preparaciones', texto: 'Todo' },
-  { cat: 'tortas', img: images['menu/Torta_Panqueque_Naranja'], alt: 'Tortas caseras', texto: 'Tortas' },
-  { cat: 'bebestibles', img: images['menu/Bebestibles'], alt: 'Infusiones y bebestibles', texto: 'Infusiones & bebestibles' },
-  { cat: 'sandwiches', img: images['menu/Sandwich1'], alt: 'Sándwiches', texto: 'Sándwiches' },
-  { cat: 'tartaletas', img: images['menu/tartaleta1'], alt: 'Tartaletas', texto: 'Tartaletas' },
-  { cat: 'postres', img: images['menu/postre1'], alt: 'Postres', texto: 'Postres' }
-];
-
-const TENDENCIAS = [
-  'Torta panqueque naranja',
-  'Torta de selva negra',
-  'limonada jengibre menta',
-  'Jugo de mango',
-  'Galletas de chocolate',
-  'Empolvados'
-];
-
-// Lleva la vista a la sección del menú (si no estamos en el inicio, navega primero).
-function useIrAlMenu() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  return () => {
-    const menu = document.getElementById('menu');
-    if (location.pathname === '/' && menu) {
-      menu.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      navigate('/#menu');
-    }
-  };
-}
+// Buscador superpuesto: sugiere productos mientras se escribe y lleva a /productos?q=texto
+const TENDENCIAS = ['Torta panqueque naranja', 'Torta selva negra', 'Limonada', 'Jugo de mango', 'Galletas', 'Empolvados'];
 
 export default function BuscadorOverlay() {
-  const { buscadorAbierto, setBuscadorAbierto, filtrarMenu, buscarMenu } = useTienda();
+  const { buscadorAbierto, setBuscadorAbierto } = useTienda();
   const [texto, setTexto] = useState('');
-  const [catActiva, setCatActiva] = useState('all');
   const inputRef = useRef(null);
-  const irAlMenu = useIrAlMenu();
+  const navigate = useNavigate();
 
   const cerrar = useCallback(() => setBuscadorAbierto(false), [setBuscadorAbierto]);
   useOverlay(buscadorAbierto, cerrar);
@@ -53,66 +24,61 @@ export default function BuscadorOverlay() {
     return () => clearTimeout(t);
   }, [buscadorAbierto]);
 
-  const elegirCategoria = (cat) => {
-    setCatActiva(cat);
+  const sugerencias = texto.trim().length >= 2 ? buscarProductos(texto).slice(0, 5) : [];
+
+  const buscar = (e) => {
+    e.preventDefault();
+    const consulta = texto.trim();
     cerrar();
-    setTimeout(() => {
-      filtrarMenu(cat);
-      irAlMenu();
-    }, 300);
+    setTexto('');
+    navigate(consulta ? `/productos?q=${encodeURIComponent(consulta)}` : '/productos');
   };
 
-  const buscar = () => {
-    buscarMenu(texto);
+  const irA = (ruta) => {
     cerrar();
-    irAlMenu();
+    setTexto('');
+    navigate(ruta);
   };
 
   return (
-    <div id="searchOv" className={buscadorAbierto ? 'open' : ''} onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
-      <button className="sovclose" id="searchClose" type="button" onClick={cerrar}>
+    <div id="searchOv" className={buscadorAbierto ? 'open' : ''} role="dialog" aria-label="Buscar productos" aria-hidden={!buscadorAbierto}
+      onClick={(e) => { if (e.target === e.currentTarget) cerrar(); }}>
+      <button className="sovclose" id="searchClose" type="button" aria-label="Cerrar buscador" onClick={cerrar}>
         <i className="fas fa-times"></i>
       </button>
       <div className="sovbox">
         <h4>¿Qué se te antoja hoy?</h4>
-        <div className="sovinput">
-          <input
-            ref={inputRef}
-            type="text"
-            id="searchInput"
-            placeholder="Busca tortas, jugos, postres..."
-            autoComplete="off"
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') buscar(); }}
-          />
-          <button id="searchSubmit" type="button" aria-label="Buscar" onClick={buscar}>
-            <i className="fas fa-search"></i>
-          </button>
-        </div>
+        <form className="sovinput" onSubmit={buscar} role="search">
+          <label htmlFor="searchInput" className="visually-hidden">Buscar productos</label>
+          <input ref={inputRef} type="search" id="searchInput" placeholder="Busca tortas, jugos, postres..." autoComplete="off"
+            value={texto} onChange={(e) => setTexto(e.target.value)} />
+          <button id="searchSubmit" type="submit" aria-label="Buscar"><i className="fas fa-search"></i></button>
+        </form>
+
+        {sugerencias.length > 0 && (
+          <ul className="list-group mt-3 text-start" aria-label="Sugerencias de productos">
+            {sugerencias.map((p) => (
+              <li key={p.codigo} className="list-group-item list-group-item-action d-flex align-items-center gap-3" role="button" tabIndex={0}
+                onClick={() => irA(`/producto/${p.codigo}`)} onKeyDown={(e) => { if (e.key === 'Enter') irA(`/producto/${p.codigo}`); }}>
+                <img src={obtenerImagen(p.imagen)} alt="" width="44" height="44" style={{ objectFit: 'cover', borderRadius: 8 }} />
+                <span>{p.nombre}<small className="d-block text-muted">{p.categoria}</small></span>
+              </li>
+            ))}
+          </ul>
+        )}
+
         <div className="sovcats">
-          {CATEGORIAS.map((c) => (
-            <div key={c.cat} className={`sovcat${catActiva === c.cat ? ' active' : ''}`} data-cat={c.cat} onClick={() => elegirCategoria(c.cat)}>
-              <img src={c.img} alt={c.alt} />{c.texto}
+          {listarCategorias().map((c) => (
+            <div key={c.id} className="sovcat" role="button" tabIndex={0} onClick={() => irA(`/categorias/${c.id}`)}
+              onKeyDown={(e) => { if (e.key === 'Enter') irA(`/categorias/${c.id}`); }}>
+              <img src={obtenerImagen(c.imagen)} alt="" />{c.nombre}
             </div>
           ))}
         </div>
         <div className="sovtrend">
           <p><i className="fas fa-fire me-1 text-secondary"></i>Búsquedas en tendencia</p>
-          
           {TENDENCIAS.map((t) => (
-            <React.Fragment key={t}>
-              {' '}
-              <span
-                className="ttag"
-                onClick={() => {
-                  setTexto(t);
-                  inputRef.current && inputRef.current.focus();
-                }}
-              >
-                {t}
-              </span>
-            </React.Fragment>
+            <React.Fragment key={t}>{' '}<span className="ttag" role="button" tabIndex={0} onClick={() => { setTexto(t); inputRef.current && inputRef.current.focus(); }}>{t}</span></React.Fragment>
           ))}
         </div>
       </div>

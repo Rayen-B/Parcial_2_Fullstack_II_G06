@@ -1,32 +1,18 @@
 import React, { useRef } from 'react';
 import ErrorCampo from '../atoms/ErrorCampo';
 import { useFormulario } from '../../hooks/useFormulario';
-import { validarTexto, validarEmail, validarTelefono } from '../../utils/validaciones';
+import { validarContacto, ASUNTOS_CONTACTO } from '../../utils/validaciones';
 
-const ASUNTOS = ['Consulta general', 'Catering & Eventos', 'Comentario', 'Asociación', 'Medios & Prensa'];
-
-export function validarContacto(v) {
-  const errores = {};
-  const nombre = validarTexto(v.nombre, 'El nombre', 3);
-  if (!nombre.valido) errores.nombre = nombre.mensaje;
-  const correo = validarEmail(v.correo);
-  if (!correo.valido) errores.correo = correo.mensaje;
-  // El teléfono es opcional: solo se valida si se escribió algo
-  if (v.telefono.trim()) {
-    const telefono = validarTelefono(v.telefono);
-    if (!telefono.valido) errores.telefono = telefono.mensaje;
-  }
-  const mensaje = validarTexto(v.mensaje, 'El mensaje', 10);
-  if (!mensaje.valido) errores.mensaje = mensaje.mensaje;
-  return errores;
-}
+const ASUNTOS = ASUNTOS_CONTACTO;
 
 export default function Contacto() {
   const exitoRef = useRef(null);
-  const { valores, errores, enviando, enviado, cambiar, enviar } = useFormulario(
+  const { valores, errores, enviando, enviado, cambiar, alSalir, alEnviar } = useFormulario(
     { nombre: '', correo: '', telefono: '', asunto: ASUNTOS[0], mensaje: '' },
     validarContacto
   );
+
+  const irAlMensaje = () => exitoRef.current && exitoRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   const claseCampo = (campo) => `fctrl${errores[campo] ? ' is-invalid' : ''}`;
 
@@ -62,48 +48,50 @@ export default function Contacto() {
                 <div className="ctinfo"><strong>Horario laboral</strong><span>Mar - Sab: 9 AM - 11 PM</span></div>
               </div>
               <div className="ctsocrow">
-                <a href="#"><i className="fab fa-facebook-f"></i></a>
-                <a href="#"><i className="fab fa-instagram"></i></a>
-                <a href="#"><i className="fab fa-twitter"></i></a>
-                <a href="#"><i className="fab fa-youtube"></i></a>
+                <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
+                <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
+                <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Youtube"><i className="fab fa-youtube"></i></a>
               </div>
             </div>
           </div>
           <div className="col-lg-8" data-aos="fade-left">
             <div className="fcard">
+              <form noValidate onSubmit={alEnviar(irAlMensaje)}>
               <div className="row g-3">
                 <div className="col-sm-6">
                   <label className="flbl">Nombre *</label>
-                  <input type="text" name="nombre" className={claseCampo('nombre')} placeholder="Papita Dulce" value={valores.nombre} onChange={cambiar} />
+                  <input type="text" name="nombre" className={claseCampo('nombre')} onBlur={alSalir} placeholder="Papita Dulce" value={valores.nombre} onChange={cambiar} />
                   <ErrorCampo mensaje={errores.nombre} />
                 </div>
                 <div className="col-sm-6">
                   <label className="flbl">Correo electrónico *</label>
-                  <input type="email" name="correo" className={claseCampo('correo')} placeholder="papitadulce@gmail.com" value={valores.correo} onChange={cambiar} />
+                  <input type="email" name="correo" className={claseCampo('correo')} onBlur={alSalir} placeholder="papitadulce@gmail.com" value={valores.correo} onChange={cambiar} />
                   <ErrorCampo mensaje={errores.correo} />
                 </div>
                 <div className="col-sm-6">
                   <label className="flbl">Numero telefónico</label>
-                  <input type="tel" name="telefono" className={claseCampo('telefono')} placeholder="+56 9 1234 5678" value={valores.telefono} onChange={cambiar} />
+                  <input type="tel" name="telefono" className={claseCampo('telefono')} onBlur={alSalir} placeholder="+56 9 1234 5678" value={valores.telefono} onChange={cambiar} />
                   <ErrorCampo mensaje={errores.telefono} />
                 </div>
                 <div className="col-sm-6">
                   <label className="flbl">Asunto *</label>
-                  <select name="asunto" className="fctrl" value={valores.asunto} onChange={cambiar}>
+                  <select name="asunto" className={claseCampo('asunto')} onBlur={alSalir} value={valores.asunto} onChange={cambiar}>
                     {ASUNTOS.map((op) => <option key={op}>{op}</option>)}
                   </select>
                 </div>
                 <div className="col-12">
                   <label className="flbl">Mensaje *</label>
-                  <textarea name="mensaje" className={claseCampo('mensaje')} rows="5" placeholder="Escribe tu mensaje aquí..." value={valores.mensaje} onChange={cambiar}></textarea>
+                  <textarea name="mensaje" maxLength={600} className={claseCampo('mensaje')} onBlur={alSalir} rows="5" placeholder="Escribe tu mensaje aquí..." value={valores.mensaje} onChange={cambiar}></textarea>
+                  <small className="text-muted d-block text-end">{valores.mensaje.length}/500</small>
                   <ErrorCampo mensaje={errores.mensaje} />
                 </div>
                 <div className="col-12">
                   <button
                     className="btn-red"
                     id="ctcBtn"
+                    type="submit"
                     disabled={enviando}
-                    onClick={() => enviar(() => exitoRef.current && exitoRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))}
                   >
                     {enviando
                       ? <><i className="fas fa-spinner fa-spin"></i> Enviando...</>
@@ -111,6 +99,7 @@ export default function Contacto() {
                   </button>
                 </div>
               </div>
+              </form>
               <div className="sucmsg" id="ctcOk" ref={exitoRef} style={enviado ? { display: 'block' } : undefined}>
                 <i className="fas fa-check-circle"></i>
                 <p>¡Mensaje enviado! Responderemos en un plazo de 2 horas.</p>

@@ -1,39 +1,45 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useTienda } from '../../context/TiendaContext';
 import { useOverlay } from '../../hooks/useOverlay';
 import ItemCarrito from '../molecules/ItemCarrito';
 import { formatearPrecio } from '../../utils/formato';
+import { descontarVenta } from '../../utils/stock';
 
-// Panel lateral del carrito 
+// Panel lateral del carrito. "Ir a pagar" lleva a la página de checkout (/checkout).
 export default function ModalCarrito() {
   const { carrito, mostrarModalCarrito, totalPrecio, totalCantidad, vaciarCarrito } = useCart();
-  const { cerrarCarrito, setPagoAbierto, confirmacion, pieConfirmacion } = useTienda();
+  const { cerrarCarrito, productos, insumos, recargarCatalogo } = useTienda();
+  const [aviso, setAviso] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
 
   useOverlay(mostrarModalCarrito, cerrarCarrito);
 
-  const vacio = carrito.length === 0;
-  const mostrarPie = !vacio || pieConfirmacion;
+  // Al abrir el carrito se lee el stock actual
+  useEffect(() => {
+    if (mostrarModalCarrito) recargarCatalogo();
+  }, [mostrarModalCarrito, recargarCatalogo]);
 
-  const verMenu = () => {
+  useEffect(() => setAviso(''), [carrito]);
+
+  const vacio = carrito.length === 0;
+
+  const verProductos = () => {
     cerrarCarrito();
-    const menu = document.getElementById('menu');
-    if (location.pathname === '/' && menu) menu.scrollIntoView({ behavior: 'smooth' });
-    else navigate('/#menu');
+    navigate('/productos');
   };
 
   const irAPagar = () => {
     if (vacio) return;
+    const stock = descontarVenta(productos, insumos, carrito);
+    if (!stock.ok) {
+      setAviso(`No hay stock suficiente de ${stock.faltante}. Ajusta la cantidad para continuar.`);
+      return;
+    }
     cerrarCarrito();
-    setPagoAbierto(true);
+    navigate('/checkout');
   };
-
-  let resumen = '';
-  if (pieConfirmacion && confirmacion) resumen = confirmacion.lineas + ' línea(s) confirmada(s)';
-  else if (!vacio) resumen = totalCantidad + ' producto(s) en tu pedido';
 
   return (
     <div
@@ -59,33 +65,19 @@ export default function ModalCarrito() {
         </div>
         <div className={`cartempty${vacio ? ' show' : ''}`} id="cartEmpty">
           <i className="fas fa-shopping-basket"></i>
-          {confirmacion ? (
-            <p>
-              <strong>Pago exitoso</strong><br />
-              Pedido {confirmacion.numero} ({confirmacion.metodoTexto})<br />
-              <small>{confirmacion.entregaTexto}. Confirmación enviada a {confirmacion.correo}.</small>
-            </p>
-          ) : (
-            <p>Tu carrito está vacío.</p>
-          )}
-          <button className="btn-red" id="cartContinue" type="button" onClick={verMenu}>
-            <i className="fas fa-utensils"></i>Ver el menú
+          <p>Tu carrito está vacío.</p>
+          <button className="btn-red" id="cartContinue" type="button" onClick={verProductos}>
+            <i className="fas fa-utensils"></i>Ver productos
           </button>
         </div>
-        <div className="cartfoot" id="cartFoot" style={{ display: mostrarPie ? 'block' : 'none' }}>
-          <div className="cartsummary" id="cartSummary" aria-live="polite">{resumen}</div>
+        <div className="cartfoot" id="cartFoot" style={{ display: vacio ? 'none' : 'block' }}>
+          <div className="cartsummary" id="cartSummary" aria-live="polite">{totalCantidad} producto(s) en tu pedido</div>
           <div className="cartsum"><span>Subtotal</span><strong id="cartSubtotal">{formatearPrecio(totalPrecio)}</strong></div>
-          <button className="cartcheckout" id="cartCheckout" type="button" style={{ display: confirmacion ? 'none' : '' }} onClick={irAPagar}>
-            <i className="fas fa-check"></i>Confirmar pedido
+          <button className="cartcheckout" id="cartCheckout" type="button" onClick={irAPagar}>
+            <i className="fas fa-check"></i>Ir a pagar
           </button>
-          <button className="cartclear" id="cartClear" type="button" style={{ display: confirmacion ? 'none' : '' }} onClick={vaciarCarrito}>
-            Vaciar carrito
-          </button>
-          <p className="cartnotice" id="cartNotice" role="status">
-            {confirmacion && (
-              <><strong>Compra confirmada:</strong> {confirmacion.totalTexto} para {confirmacion.nombre}.</>
-            )}
-          </p>
+          <button className="cartclear" id="cartClear" type="button" onClick={vaciarCarrito}>Vaciar carrito</button>
+          {aviso && <p className="cartnotice cartitem-aviso" role="alert">{aviso}</p>}
         </div>
       </div>
     </div>

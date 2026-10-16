@@ -1,36 +1,34 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import AOS from 'aos';
-import { useTienda } from '../context/TiendaContext';
+import { useSeo } from '../hooks/useSeo';
 import LightboxImagen from '../components/molecules/LightboxImagen';
 import CarruselTestimonios from '../components/organisms/CarruselTestimonios';
 import Hero from '../components/secciones/Hero';
 import Categorias from '../components/secciones/Categorias';
 import Nosotros from '../components/secciones/Nosotros';
-import MenuSeccion from '../components/secciones/MenuSeccion';
+import Destacados from '../components/secciones/Destacados';
 import OfertaEspecial from '../components/secciones/OfertaEspecial';
 import Galeria from '../components/secciones/Galeria';
 import Historia from '../components/secciones/Historia';
 import Chefs from '../components/secciones/Chefs';
 import Horarios from '../components/secciones/Horarios';
 import Reservacion from '../components/secciones/Reservacion';
+import Entregas from '../components/secciones/Entregas';
 import Blog from '../components/secciones/Blog';
 import Boletin from '../components/secciones/Boletin';
 import Contacto from '../components/secciones/Contacto';
 import images from '../assets/images';
 
-// Página principal de la tienda
+// Página principal: es el "hub" del sitio (index.html). Desde aquí se llega a todas las demás vistas.
 export default function Inicio() {
+  useSeo({
+    titulo: '',
+    descripcion: 'Papita Dulce: pastelería y cafetería artesanal en Santiago. Tortas caseras, tartaletas, postres, sándwiches e infusiones. Compra online y retira en tienda.'
+  });
   const location = useLocation();
-  const { filtro, filtrarMenu } = useTienda();
   const [historiaAbierta, setHistoriaAbierta] = useState(false);
 
-  // Animaciones al hacer scroll
-  useEffect(() => {
-    AOS.init({ duration: 680, once: true, offset: 55 });
-    AOS.refreshHard();
-  }, []);
-
+  // Los enlaces de la barra superior (/#about, /#chefs...) bajan hasta el panel pedido
   useEffect(() => {
     if (!location.hash) return undefined;
     const t = setTimeout(() => {
@@ -38,22 +36,16 @@ export default function Inicio() {
       if (destino) window.scrollTo({ top: destino.offsetTop - 78, behavior: 'smooth' });
     }, 100);
     return () => clearTimeout(t);
-  }, [location.hash]);
-
-  // Tarjetas de categoría: bajan al menú y luego aplican el filtro
-  const elegirCategoria = (cat) => {
-    window.scrollTo({ top: document.getElementById('menu').offsetTop - 80, behavior: 'smooth' });
-    setTimeout(() => filtrarMenu(cat), 480);
-  };
+  }, [location.hash, location.key]);
 
   const cerrarHistoria = useCallback(() => setHistoriaAbierta(false), []);
 
   return (
     <>
       <Hero onVerHistoria={() => setHistoriaAbierta(true)} />
-      <Categorias filtroActivo={filtro} onElegir={elegirCategoria} />
+      <Categorias />
       <Nosotros />
-      <MenuSeccion />
+      <Destacados />
       <OfertaEspecial />
       <Galeria />
       <Historia />
@@ -61,7 +53,8 @@ export default function Inicio() {
       <Horarios />
       <CarruselTestimonios />
       <Reservacion />
-      <Blog />
+      <Entregas />
+      <Blog limite={3} conVerTodos />
       <Boletin />
       <Contacto />
       <LightboxImagen src={images['Historia']} abierto={historiaAbierta} onCerrar={cerrarHistoria} />

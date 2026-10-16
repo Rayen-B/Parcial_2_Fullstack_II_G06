@@ -4,8 +4,10 @@ import AdminLayout from '../../components/organisms/AdminLayout';
 import FeedbackCampo, { claseValidacion } from '../../components/atoms/FeedbackCampo';
 import { obtenerProductos, guardarProductos } from '../../services/storage';
 import { validarCodigoProducto, validarPrecio, validarStock } from '../../utils/validaciones';
+import { useCategorias } from '../../hooks/useCategorias';
+import { obtenerInsumos } from '../../services/insumos';
+import { calcularPreparables } from '../../utils/stock';
 
-const CATEGORIAS = ['Tortas', 'Pastelería Chilena', 'Postres', 'Bebestibles', 'Infusiones', 'Sándwiches', 'Tartaletas', 'Sin Azúcar', 'Sin Gluten'];
 const FORM_VACIO = { codigo: '', nombre: '', categoria: '', precio: '', stock: '', stockCritico: '', descripcion: '' };
 const IMAGEN_POR_DEFECTO = 'menu/Torta_Selva_Negra';
 
@@ -22,6 +24,22 @@ export function avisoStockCritico(stock, critico) {
   return valStock <= valCritico ? { valStock, valCritico } : false;
 }
 
+// Revisa las filas de la receta: insumo elegido, cantidad mayor a 0 y sin insumos repetidos
+export function validarReceta(filas) {
+  const usados = new Set();
+  for (const f of filas) {
+    if (!f.insumoId) return { valido: false, mensaje: 'Elige el insumo de cada fila de la receta' };
+    if (f.cantidad === '' || isNaN(f.cantidad) || Number(f.cantidad) <= 0) return { valido: false, mensaje: 'Cada insumo de la receta necesita una cantidad mayor a 0' };
+    if (usados.has(f.insumoId)) return { valido: false, mensaje: 'Hay insumos repetidos en la receta' };
+    usados.add(f.insumoId);
+  }
+  return { valido: true, mensaje: 'Receta correcta' };
+}
+
+const recetaANumeros = (filas) => filas
+  .filter((f) => f.insumoId && Number(f.cantidad) > 0)
+  .map((f) => ({ insumoId: f.insumoId, cantidad: Number(f.cantidad) }));
+
 // Guarda o actualiza el producto (por código)
 function guardarProducto(producto) {
   const productos = obtenerProductos();
@@ -32,6 +50,7 @@ function guardarProducto(producto) {
 }
 
 export default function AdminProductoForm() {
+  const categorias = useCategorias();
   const [searchParams] = useSearchParams();
   const codigoParam = searchParams.get('codigo');
 
@@ -40,6 +59,8 @@ export default function AdminProductoForm() {
   const [imagenNueva, setImagenNueva] = useState(null);
   const [feedback, setFeedback] = useState({}); // { campo: { valido, mensaje } }
   const [alerta, setAlerta] = useState(null);   // { tipo, contenido }
+  const [insumos] = useState(obtenerInsumos);
+  const [receta, setReceta] = useState([]);       // [{ insumoId, cantidad }]
 
   useEffect(() => {
     if (!codigoParam) return;
@@ -55,17 +76,21 @@ export default function AdminProductoForm() {
       stockCritico: p.stockCritico || 0,
       descripcion: p.descripcion || ''
     });
+    setReceta((p.receta || []).map((r) => ({ insumoId: r.insumoId, cantidad: String(r.cantidad) })));
   }, [codigoParam]);
 
   const esEdicion = productoEditado !== null;
+  const preparables = calcularPreparables(recetaANumeros(receta), insumos);
+  const unidadDe = (id) => (insumos.find((i) => i.id === id) || { unidad: '' }).unidad;
 
-  // Revisa el aviso de stock crítico con los valores actuales
-  const revisarStockCritico = (stock, critico) => {
-    const aviso = avisoStockCritico(stock, critico);
+  // Revisa el aviso de stock crítico con lo disponible (vitrina + preparables)
+  const revisarStockCritico = (stock, critico, filas = receta) => {
+    const extra = calcularPreparables(recetaANumeros(filas), insumos);
+    const aviso = avisoStockCritico(stock === '' ? stock : Number(stock) + extra, critico);
     if (aviso) {
       setAlerta({
         tipo: 'warning',
-        contenido: <><i className="ti ti-alert-triangle me-1"></i> <strong>Aviso de Stock Crítico:</strong> El stock ingresado ({aviso.valStock}) es menor o igual al límite crítico ({aviso.valCritico}).</>
+        contenido: <><i className="ti ti-alert-triangle me-1"></i> <strong>Aviso de Stock Crítico:</strong> El stock disponible ({aviso.valStock}, vitrina + preparables) es menor o igual al límite crítico ({aviso.valCritico}).</>
       });
     } else if (aviso === false) {
       setAlerta((actual) => (actual && actual.tipo === 'warning' ? null : actual));
@@ -84,6 +109,15 @@ export default function AdminProductoForm() {
     if (campo === 'stock' || campo === 'stockCritico') revisarStockCritico(nuevo.stock, nuevo.stockCritico);
   };
 
+  const cambiarReceta = (nuevas) => {
+    setReceta(nuevas);
+    if (feedback.receta) setFeedback((f) => ({ ...f, receta: validarReceta(nuevas) }));
+    revisarStockCritico(form.stock, form.stockCritico, nuevas);
+  };
+  const cambiarFila = (indice, campo) => (e) => cambiarReceta(receta.map((f, i) => (i === indice ? { ...f, [campo]: e.target.value } : f)));
+  const agregarFila = () => cambiarReceta([...receta, { insumoId: '', cantidad: '' }]);
+  const quitarFila = (indice) => cambiarReceta(receta.filter((_, i) => i !== indice));
+
   const cambiarImagen = (e) => {
     const archivo = e.target.files[0];
     if (!archivo) return;
@@ -99,9 +133,10 @@ export default function AdminProductoForm() {
     const valStock = validarStock(form.stock);
     const valNombre = validarNombreProducto(form.nombre).valido;
     const valCategoria = form.categoria !== '';
-    setFeedback((f) => ({ ...f, codigo: valCodigo, precio: valPrecio, stock: valStock }));
+    const valReceta = validarReceta(receta);
+    setFeedback((f) => ({ ...f, codigo: valCodigo, precio: valPrecio, stock: valStock, receta: valReceta }));
 
-    if (!(valCodigo.valido && valPrecio.valido && valStock.valido && valNombre && valCategoria)) {
+    if (!(valCodigo.valido && valPrecio.valido && valStock.valido && valNombre && valCategoria && valReceta.valido)) {
       setAlerta({ tipo: 'danger', contenido: <><i className="ti ti-alert-triangle me-1"></i> Por favor verifique los campos marcados en rojo.</> });
       return;
     }
@@ -115,6 +150,7 @@ export default function AdminProductoForm() {
       stock: parseInt(form.stock, 10),
       stockCritico: parseInt(form.stockCritico, 10) || 0,
       descripcion: form.descripcion.trim(),
+      receta: recetaANumeros(receta),
       // si no se sube una foto nueva se conserva la anterior
       imagen: imagenNueva || (productoEditado && productoEditado.imagen) || IMAGEN_POR_DEFECTO
     };
@@ -128,6 +164,7 @@ export default function AdminProductoForm() {
     if (!esEdicion) {
       setForm(FORM_VACIO);
       setFeedback({});
+      setReceta([]);
       setImagenNueva(null);
       e.currentTarget.reset();
     }
@@ -182,7 +219,8 @@ export default function AdminProductoForm() {
                   <label htmlFor="categoria" className="form-label">Categorías <span className="text-danger">*</span></label>
                   <select className="form-select" id="categoria" required value={form.categoria} onChange={cambiar('categoria')}>
                     <option value="">-- Selecciona una categoría --</option>
-                    {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
+                    {categorias.map((c) => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
+                    {form.categoria && !categorias.some((c) => c.nombre === form.categoria) && <option value={form.categoria}>{form.categoria}</option>}
                   </select>
                   <div className="form-text small">Requerido.</div>
                 </div>
@@ -195,9 +233,9 @@ export default function AdminProductoForm() {
                     <FeedbackCampo resultado={feedback.precio} />
                   </div>
                   <div className="col-md-6">
-                    <label htmlFor="stock" className="form-label">Stock <span className="text-danger">*</span></label>
+                    <label htmlFor="stock" className="form-label">Stock en vitrina <span className="text-danger">*</span></label>
                     <input type="number" className={'form-control' + claseValidacion(feedback.stock)} id="stock" placeholder="0" min="0" step="1" required value={form.stock} onChange={cambiar('stock')} />
-                    <div className="form-text small">Requerido.</div>
+                    <div className="form-text small">Requerido. Unidades ya preparadas, listas para vender.</div>
                     <FeedbackCampo resultado={feedback.stock} />
                   </div>
                 </div>
@@ -206,13 +244,39 @@ export default function AdminProductoForm() {
                   <div className="col-md-6">
                     <label htmlFor="stock-critico" className="form-label">Stock Crítico (Opcional)</label>
                     <input type="number" className="form-control" id="stock-critico" placeholder="Ej: 3" min="0" step="1" value={form.stockCritico} onChange={cambiar('stockCritico')} />
-                    <div className="form-text small">Opcional. Mínimo 0, enteros. Alerta cuando el stock sea igual o inferior.</div>
+                    <div className="form-text small">Opcional. Mínimo 0, enteros. Alerta cuando lo disponible (vitrina + preparables) sea igual o inferior.</div>
                   </div>
                   <div className="col-md-6">
                     <label htmlFor="imagen" className="form-label">Imagen (Opcional)</label>
                     <input type="file" className="form-control" id="imagen" accept="image/*" onChange={cambiarImagen} />
                     <div className="form-text small">Opcional.</div>
                   </div>
+                </div>
+                {/* Receta */}
+                <div className="mb-3">
+                  <label className="form-label"><i className="ti ti-chef-hat me-1"></i> Receta (Opcional)</label>
+                  <div className="form-text small mt-0 mb-2">Insumos que usa una unidad completa (un trozo usa 1/4). Sin receta, solo se vende lo que hay en vitrina.</div>
+                  {receta.map((fila, i) => (
+                    <div key={i} className="d-flex gap-2 mb-2 align-items-center">
+                      <select className="form-select form-select-sm" aria-label="Insumo" value={fila.insumoId} onChange={cambiarFila(i, 'insumoId')}>
+                        <option value="">-- Insumo --</option>
+                        {insumos.map((ins) => <option key={ins.id} value={ins.id}>{ins.nombre}</option>)}
+                      </select>
+                      <div className="input-group input-group-sm" style={{ maxWidth: '170px' }}>
+                        <input type="number" className="form-control" aria-label="Cantidad" placeholder="0" min="0" step="any" value={fila.cantidad} onChange={cambiarFila(i, 'cantidad')} />
+                        <span className="input-group-text" style={{ minWidth: '42px' }}>{unidadDe(fila.insumoId) || '—'}</span>
+                      </div>
+                      <button type="button" className="btn btn-outline-danger btn-sm" aria-label="Quitar insumo" onClick={() => quitarFila(i)}><i className="ti ti-x"></i></button>
+                    </div>
+                  ))}
+                  <button type="button" className="btn btn-outline-pasteleria btn-sm" onClick={agregarFila}><i className="ti ti-plus me-1"></i> Agregar insumo</button>
+                  {feedback.receta && !feedback.receta.valido && <div className="text-danger small mt-2">{feedback.receta.mensaje}</div>}
+                  {receta.length > 0 && (
+                    <div className="small mt-2 text-muted">
+                      Con los insumos actuales se pueden preparar <strong className="text-principal">{preparables}</strong> unidad(es) más.
+                      {form.stock !== '' && <> Disponible total: <strong className="text-principal">{(parseInt(form.stock, 10) || 0) + preparables}</strong>.</>}
+                    </div>
+                  )}
                 </div>
                 {/* Descripción */}
                 <div className="mb-4">
@@ -225,7 +289,7 @@ export default function AdminProductoForm() {
                 </div>
                 {/* Botones */}
                 <div className="d-flex gap-2 justify-content-end">
-                  <Link to="/admin/productos" className="btn btn-light">Cancelar</Link>
+                  <Link to="/admin/productos" className="btn btn-light"><i className="ti ti-x me-1"></i> Cancelar</Link>
                   <button type="submit" className="btn btn-pasteleria px-4 fw-semibold">
                     <i className="ti ti-device-floppy me-1"></i> {esEdicion ? 'GUARDAR CAMBIOS' : 'GUARDAR PRODUCTO'}
                   </button>

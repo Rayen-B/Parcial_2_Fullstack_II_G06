@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import ErrorCampo from '../atoms/ErrorCampo';
 import { useFormulario } from '../../hooks/useFormulario';
-import { validarTexto, validarTelefono, validarEmail, validarFecha } from '../../utils/validaciones';
+import { validarNombrePersona, validarTelefono, validarEmail, validarFecha } from '../../utils/validaciones';
 
 const INFO = [
   { icono: 'fa-clock', titulo: 'Horario de atención', texto: 'Miér - Dom, 9 AM - 11 PM' },
@@ -15,7 +15,7 @@ const HORAS = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM', '02:0
 
 export function validarReserva(v) {
   const errores = {};
-  const nombre = validarTexto(v.nombre, 'El nombre completo', 3);
+  const nombre = validarNombrePersona(v.nombre, 'El nombre completo', 3, 60);
   if (!nombre.valido) errores.nombre = nombre.mensaje;
   const telefono = validarTelefono(v.telefono);
   if (!telefono.valido) errores.telefono = telefono.mensaje;
@@ -28,10 +28,12 @@ export function validarReserva(v) {
 
 export default function Reservacion() {
   const exitoRef = useRef(null);
-  const { valores, errores, enviando, enviado, cambiar, enviar } = useFormulario(
+  const { valores, errores, enviando, enviado, cambiar, alSalir, alEnviar } = useFormulario(
     { nombre: '', telefono: '', correo: '', invitados: INVITADOS[0], fecha: '', hora: HORAS[0], solicitudes: '' },
     validarReserva
   );
+
+  const irAlMensaje = () => exitoRef.current && exitoRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   const claseCampo = (campo) => `fctrl${errores[campo] ? ' is-invalid' : ''}`;
 
@@ -61,20 +63,21 @@ export default function Reservacion() {
           </div>
           <div className="col-lg-8" data-aos="fade-left">
             <div className="fcard">
+              <form noValidate onSubmit={alEnviar(irAlMensaje)}>
               <div className="row g-3">
                 <div className="col-sm-6">
                   <label className="flbl">Nombre completo *</label>
-                  <input type="text" name="nombre" className={claseCampo('nombre')} placeholder="Juan Perez" value={valores.nombre} onChange={cambiar} />
+                  <input type="text" name="nombre" className={claseCampo('nombre')} onBlur={alSalir} placeholder="Juan Perez" value={valores.nombre} onChange={cambiar} />
                   <ErrorCampo mensaje={errores.nombre} />
                 </div>
                 <div className="col-sm-6">
                   <label className="flbl">Número de teléfono *</label>
-                  <input type="tel" name="telefono" className={claseCampo('telefono')} placeholder="+56 9 1234 5678" value={valores.telefono} onChange={cambiar} />
+                  <input type="tel" name="telefono" className={claseCampo('telefono')} onBlur={alSalir} placeholder="+56 9 1234 5678" value={valores.telefono} onChange={cambiar} />
                   <ErrorCampo mensaje={errores.telefono} />
                 </div>
                 <div className="col-sm-6">
                   <label className="flbl">Dirección de correo electrónico *</label>
-                  <input type="email" name="correo" className={claseCampo('correo')} placeholder="tu@email.com" value={valores.correo} onChange={cambiar} />
+                  <input type="email" name="correo" className={claseCampo('correo')} onBlur={alSalir} placeholder="tu@email.com" value={valores.correo} onChange={cambiar} />
                   <ErrorCampo mensaje={errores.correo} />
                 </div>
                 <div className="col-sm-6">
@@ -85,7 +88,7 @@ export default function Reservacion() {
                 </div>
                 <div className="col-sm-6">
                   <label className="flbl">Fecha *</label>
-                  <input type="date" name="fecha" className={claseCampo('fecha')} value={valores.fecha} onChange={cambiar} />
+                  <input type="date" name="fecha" className={claseCampo('fecha')} onBlur={alSalir} value={valores.fecha} onChange={cambiar} />
                   <ErrorCampo mensaje={errores.fecha} />
                 </div>
                 <div className="col-sm-6">
@@ -99,8 +102,8 @@ export default function Reservacion() {
                   <button
                     className="btn-red w-100 justify-content-center"
                     id="resBtn"
+                    type="submit"
                     disabled={enviando}
-                    onClick={() => enviar(() => exitoRef.current && exitoRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))}
                   >
                     {enviando
                       ? <><i className="fas fa-spinner fa-spin"></i> Reservando...</>
@@ -108,6 +111,7 @@ export default function Reservacion() {
                   </button>
                 </div>
               </div>
+              </form>
               <div className="sucmsg" id="resOk" ref={exitoRef} style={enviado ? { display: 'block' } : undefined}>
                 <i className="fas fa-check-circle"></i>
                 <p>¡Mesa reservada! Te lo confirmaremos por correo electrónico en breve.</p>

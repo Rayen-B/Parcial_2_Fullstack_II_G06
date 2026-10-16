@@ -144,7 +144,7 @@ export default function AdminUsuarioForm() {
                 <div className="row g-3 mb-3">
                   <div className="col-md-6">
                     <label htmlFor="run" className="form-label">RUN<span className="text-danger">*</span></label>
-                    <input type="text" className={'form-control font-monospace' + claseValidacion(feedback.run)} id="run" placeholder="Ej: 19011022K" maxLength={9} required readOnly={esEdicion} value={form.run} onChange={cambiar('run')} />
+                    <input type="text" className={'form-control font-monospace' + claseValidacion(feedback.run)} id="run" placeholder="Ej: 190110222" maxLength={9} required readOnly={esEdicion} value={form.run} onChange={cambiar('run')} />
                     <div className="form-text small">Sin puntos ni guión.</div>
                     <FeedbackCampo resultado={feedback.run} />
                   </div>
@@ -220,7 +220,7 @@ export default function AdminUsuarioForm() {
                 </div>
                 {/* Botones de Acción */}
                 <div className="d-flex gap-2 justify-content-end">
-                  <Link to="/admin/usuarios" className="btn btn-light">Cancelar</Link>
+                  <Link to="/admin/usuarios" className="btn btn-light"><i className="ti ti-x me-1"></i> Cancelar</Link>
                   <button type="submit" className="btn btn-pasteleria px-4 fw-semibold">
                     <i className="ti ti-device-floppy me-1"></i> {esEdicion ? 'GUARDAR CAMBIOS' : 'GUARDAR USUARIO'}
                   </button>

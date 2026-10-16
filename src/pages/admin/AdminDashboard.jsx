@@ -4,6 +4,9 @@ import AdminLayout from '../../components/organisms/AdminLayout';
 import { obtenerProductos, obtenerUsuarios, obtenerOrdenes } from '../../services/storage';
 import images, { obtenerImagen } from '../../assets/images';
 import { useSoloAdmin } from '../../hooks/useSoloAdmin';
+import { obtenerInsumos } from '../../services/insumos';
+import { esProductoCritico, disponibleProducto, stockVitrina, calcularPreparables } from '../../utils/stock';
+import { ordenarProductos } from './AdminProductos';
 
 export default function AdminDashboard() {
   const [productos, setProductos] = useState([]);
@@ -18,9 +21,11 @@ export default function AdminDashboard() {
   }, []);
 
   const totalProductos = productos.length;
-  //crítico si el stock está en o bajo su stock crítico
-  const esCritico = (p) => p.stock <= (p.stockCritico || 0);
-  const stockCriticoCount = productos.filter(esCritico).length;
+  // crítico si lo disponible (vitrina + preparables) está en o bajo su stock crítico
+  const insumos = obtenerInsumos();
+  const stockCriticoCount = productos.filter((p) => esProductoCritico(p, insumos)).length;
+  // Resumen: los más críticos primero (mismo orden que el Inventario)
+  const resumen = ordenarProductos(productos, 'prioridad', insumos).slice(0, 5);
   const totalOrdenes = ordenes.length;
   const totalUsuarios = usuarios.length;
 
@@ -123,9 +128,14 @@ export default function AdminDashboard() {
           <h6 className="mb-0 fw-bold text-principal">
             <i className="ti ti-cake me-1"></i> Resumen de Productos
           </h6>
-          <Link to="/admin/productos" className="btn btn-outline-pasteleria btn-sm">
-            Ver Todo
-          </Link>
+          <div className="d-flex gap-2">
+            <Link to="/admin/insumos" className="btn btn-outline-pasteleria btn-sm">
+              <i className="ti ti-chef-hat me-1"></i> Ver Insumos
+            </Link>
+            <Link to="/admin/productos" className="btn btn-outline-pasteleria btn-sm">
+              <i className="ti ti-list me-1"></i> Ver Todo
+            </Link>
+          </div>
         </div>
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
@@ -143,8 +153,8 @@ export default function AdminDashboard() {
               {productos.length === 0 && (
                 <tr><td colSpan="6" className="text-center py-4 text-muted"><i className="ti ti-alert-circle me-1"></i> No hay productos registrados.</td></tr>
               )}
-              {productos.slice(0, 5).map((p) => {
-                const critico = esCritico(p);
+              {resumen.map((p) => {
+                const critico = esProductoCritico(p, insumos);
                 return (
                   <tr key={p.codigo || p.id}>
                     <td className="fw-semibold font-monospace" data-label="Código">{p.codigo || p.id}</td>
@@ -162,11 +172,16 @@ export default function AdminDashboard() {
                       <span className="badge-soft-primary">{p.categoria || 'Pastelería'}</span>
                     </td>
                     <td className="fw-bold" data-label="Precio">${Number(p.precio).toLocaleString('es-CL')}</td>
-                    <td data-label="Stock"><span className={`fw-bold ${critico ? 'text-danger' : ''}`}>{p.stock}</span></td>
+                    <td data-label="Stock">
+                      <div className="d-flex flex-column text-end">
+                        <span className={`fw-bold ${critico ? 'text-danger' : ''}`}>{disponibleProducto(p, insumos)}</span>
+                        <small className="text-muted text-nowrap">Vitrina {stockVitrina(p)} · Prep. {(p.receta || []).length ? calcularPreparables(p.receta, insumos) : '—'}</small>
+                      </div>
+                    </td>
                     <td data-label="Estado">
                       {critico ? (
                         <span className="badge-soft-danger">
-                          <i className="ti ti-alert-triangle me-1"></i> Crítico
+                          <i className="ti ti-alert-triangle me-1"></i> Crítico (Min: {p.stockCritico || 0})
                         </span>
                       ) : (
                         <span className="badge-soft-success">Normal</span>

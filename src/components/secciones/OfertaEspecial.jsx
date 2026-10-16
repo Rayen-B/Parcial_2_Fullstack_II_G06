@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import images from '../../assets/images';
 
 const INICIO = { h: 8, m: 45, s: 30 };
@@ -36,7 +37,7 @@ export default function OfertaEspecial() {
               <div className="cditem"><span className="cdnum" id="cdM">{dosDigitos(tiempo.m)}</span><span className="cdlbl">Minutos</span></div>
               <div className="cditem"><span className="cdnum" id="cdS">{dosDigitos(tiempo.s)}</span><span className="cdlbl">Segundos</span></div>
             </div>
-            <a href="#menu" className="btn-red"><i className="fas fa-shopping-cart"></i>Aprovechar oferta</a>
+            <Link to="/ofertas" className="btn-red"><i className="fas fa-shopping-cart"></i>Ver todas las ofertas</Link>
           </div>
           <div className="col-lg-6" data-aos="fade-left">
             <div className="spimgw">

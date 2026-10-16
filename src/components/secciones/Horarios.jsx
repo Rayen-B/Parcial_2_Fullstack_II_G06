@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const HORARIOS = [
   { dias: 'Lunes - Martes', abierto: false, horario: 'Cerrado' },
@@ -43,7 +44,7 @@ export default function Horarios() {
               <i className="fas fa-truck-fast fa-2x mb-3 text-icon-light"></i>
               <h4>Ordena Online</h4>
               <p>Recibe tus preparaciones favoritas en 25 minutos</p>
-              <a href="#menu" className="btnw">Ordenar Ahora</a>
+              <Link to="/productos" className="btnw">Ordenar Ahora</Link>
             </div>
           </div>
           <div className="col-lg-4" data-aos="fade-left">

@@ -215,41 +215,97 @@ img {
   color: var(--primary);
 }
 .account-toggle {
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   color: #555;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font: 600 0.78rem "Poppins", sans-serif;
+  padding: 7px 9px;
+  border-radius: 999px;
+  font: 600 0.75rem "Poppins", sans-serif;
+  white-space: nowrap;
   transition: 0.3s;
 }
 .account-toggle:hover {
+  border-color: var(--border);
   background: rgba(232, 40, 26, 0.08);
   color: var(--primary);
 }
 .account-toggle.is-logged-in { color: var(--green); }
 .account-toggle.is-logged-in i { color: var(--green); }
+.nav-actions {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  gap: 3px !important;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fffaf6;
+}
+.nav-actions > * {
+  flex: 0 0 auto;
+}
+.nav-actions #navSearchBtn {
+  padding: 7px 9px;
+}
 .nav-cta {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   border: none;
   color: #fff !important;
-  border-radius: 8px;
-  padding: 10px 20px !important;
-  font-size: 0.84rem !important;
+  border-radius: 999px;
+  padding: 8px 13px !important;
+  font-size: 0.78rem !important;
   font-weight: 600 !important;
-  box-shadow: 0 4px 15px rgba(232, 40, 26, 0.3);
-  margin-left: 6px;
+  box-shadow: 0 3px 10px rgba(232, 40, 26, 0.2);
+  margin-left: 2px;
 }
 .nav-cta::after {
   display: none !important;
 }
 .nav-cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(232, 40, 26, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(232, 40, 26, 0.3);
+}
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  #nav .navbar-nav .nav-link {
+    padding-right: 7px !important;
+    padding-left: 7px !important;
+    font-size: 0.8rem;
+  }
+  #nav .account-toggle {
+    gap: 4px;
+    padding-right: 6px;
+    padding-left: 6px;
+    font-size: 0.69rem;
+  }
+  #nav .nav-cta {
+    padding-right: 9px !important;
+    padding-left: 9px !important;
+  }
+}
+@media (max-width: 575.98px) {
+  #nav .navbar-collapse {
+    padding-top: 0.5rem;
+  }
+  #nav .navbar-nav .nav-link {
+    padding: 10px 12px !important;
+  }
+  #nav .nav-actions {
+    width: 100%;
+    justify-content: center;
+    margin: 0.5rem 0 0.75rem;
+  }
+  #nav .account-toggle {
+    gap: 4px;
+    padding: 6px 5px;
+    font-size: 0.68rem;
+  }
+  #nav .nav-cta {
+    padding: 7px 9px !important;
+    font-size: 0.72rem !important;
+  }
 }
 
 /* ===================== SECTION COMMONS ===================== */
@@ -743,6 +799,62 @@ section {
   color: #888;
   margin: 0;
   line-height: 1.6;
+}
+
+.checkout-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 1.25rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--secondary);
+  background: #fff;
+  font-weight: 600;
+}
+.checkout-back:hover {
+  color: var(--secondary-hover);
+  border-color: var(--primary);
+  background: var(--cream);
+}
+.checkout-section {
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 28px rgba(66, 65, 74, 0.07);
+}
+.checkout-section legend {
+  float: none;
+  width: auto;
+  margin-bottom: 1.25rem;
+  padding: 0;
+}
+.checkout-summary {
+  top: 110px;
+  border: 1px solid var(--border);
+  background: var(--cream);
+  box-shadow: 0 10px 32px rgba(66, 65, 74, 0.08);
+}
+.checkout-pay-actions {
+  display: grid;
+  gap: 0.7rem;
+}
+.checkout-decline {
+  min-height: 48px;
+  border: 1px solid #dc3545;
+  border-radius: 8px;
+  color: #b02a37;
+  background: #fff;
+  font-weight: 600;
+}
+.checkout-decline:hover {
+  color: #fff;
+  border-color: #b02a37;
+  background: #b02a37;
+}
+@media (max-width: 991.98px) {
+  .checkout-summary {
+    position: static !important;
+  }
 }
 
 /* ===================== MENU ===================== */
@@ -3068,6 +3180,192 @@ footer {
 }
 .transfer-check input { width: auto; margin-top: 3px; }
 
+/* ===================== TIENDA: FILTROS, NAV, PAGOS Y ENTREGAS ===================== */
+#nav {
+  background: linear-gradient(100deg, #fffaf5 0%, #fff 58%, #fff6ef 100%);
+  border-bottom: 1px solid var(--border);
+}
+#nav .navbar-nav .nav-link { color: var(--secondary) !important; }
+#nav .navbar-nav .nav-link:hover,
+#nav .navbar-nav .nav-link.active { color: var(--primary-hover) !important; }
+#nav .navbar-nav .nav-link::after { background: var(--primary); }
+#nav .navbar-toggler { background: var(--cream); }
+#nav .navbar-toggler i,
+#nav #navSearchBtn { color: var(--secondary); }
+#nav #navSearchBtn:hover,
+#nav .account-toggle:hover { background: var(--cream); color: var(--secondary-hover); }
+#nav .nav-actions {
+  border-color: var(--border);
+  background: rgba(255, 246, 239, 0.85);
+}
+#nav .nav-cta {
+  background: linear-gradient(135deg, var(--secondary), var(--secondary-hover));
+  box-shadow: 0 3px 10px rgba(137, 69, 48, 0.18);
+}
+#nav .nav-cta:hover { box-shadow: 0 5px 14px rgba(137, 69, 48, 0.25); }
+
+.menu-filters {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  margin: 0 auto 1.5rem;
+  max-width: 980px;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, #fffaf5, #fff);
+  box-shadow: 0 8px 24px rgba(66, 65, 74, 0.06);
+}
+.menu-search {
+  position: relative;
+  width: min(100%, 600px);
+}
+.menu-search > i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  z-index: 1;
+  color: var(--secondary);
+  transform: translateY(-50%);
+}
+.menu-search .fctrl {
+  min-height: 48px;
+  padding-left: 2.8rem;
+  border-color: var(--border);
+  border-radius: 999px;
+  background: #fff;
+}
+.menu-search .fctrl:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem rgba(255, 161, 40, 0.17);
+}
+.menu-categories {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+}
+.menu-categories .filtbtn {
+  margin: 0;
+  border: 1px solid #ead8c9;
+  background: #fff;
+  color: var(--secondary);
+}
+.menu-categories .filtbtn:hover,
+.menu-categories .filtbtn.active {
+  border-color: var(--secondary);
+  background: var(--secondary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(137, 69, 48, 0.2);
+}
+.menu-clear-filters {
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--secondary);
+  font: 600 0.8rem "Poppins", sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.menu-clear-filters:hover { color: var(--primary-hover); }
+.categories-list-only { padding-top: 0.5rem; }
+
+.payment-method-card {
+  border-color: var(--border);
+  background: #fff;
+}
+.payment-method-card:focus-within {
+  outline: 3px solid rgba(255, 161, 40, 0.3);
+  outline-offset: 2px;
+}
+.payment-method-card > input[type="radio"] {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--secondary);
+}
+.payment-method-card > i:not(.payment-method-check) {
+  flex: 0 0 26px;
+  color: var(--secondary);
+  font-size: 1.2rem;
+  text-align: center;
+}
+.payment-method-card.active {
+  border-color: var(--secondary);
+  background: var(--cream);
+}
+.payment-method-card.active .payment-method-check { color: var(--secondary); }
+.payment-info {
+  margin: 0.25rem 0 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 0.75rem;
+  background: #fffaf5;
+  color: var(--dark);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.payment-info strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--secondary);
+}
+.checkout-decline {
+  border-color: #b02a37;
+  color: #a31d2d;
+}
+
+.delivery-section {
+  background: var(--cream);
+}
+.delivery-card {
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(66, 65, 74, 0.06);
+}
+.delivery-icon {
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--secondary);
+  font-size: 1.2rem;
+}
+.delivery-card h3 {
+  margin-bottom: 0.65rem;
+  font-size: 1.25rem;
+}
+.delivery-card p {
+  margin: 0;
+  color: #68666b;
+  line-height: 1.7;
+}
+@media (max-width: 1199.98px) {
+  #nav .navbar-collapse {
+    padding-top: 0.5rem;
+    padding-bottom: 0.75rem;
+  }
+  #nav .navbar-nav .nav-link { padding: 0.65rem 0.8rem !important; }
+  #nav .nav-actions { justify-content: center; flex-wrap: wrap; }
+}
+@media (max-width: 575.98px) {
+  .menu-filters { padding: 1rem 0.75rem; }
+  .menu-categories { gap: 0.35rem; }
+  .menu-categories .filtbtn { padding: 0.45rem 0.8rem; font-size: 0.76rem; }
+  .payment-method-card { gap: 0.65rem; padding: 0.85rem; }
+  .payment-method-card strong { font-size: 0.8rem; }
+  .payment-method-card span { font-size: 0.69rem; }
+  .delivery-card { padding: 1.5rem; }
+}
+
 /* --- NOTIFICACIÓN DE PAGO (toast) ---
    Pequeño aviso flotante que aparece abajo a la derecha cuando se
    confirma un pago (ver notificarPagoConfirmado() en js/main.js). --- */
@@ -3404,4 +3702,18 @@ footer {
   .stitle {
     font-size: 1.8rem;
   }
+}
+
+/* --- AVISOS DE STOCK EN EL CARRITO --- */
+.cartitem-aviso {
+  font-size: 0.72rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 4px;
+}
+.cartqty button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: transparent;
+  color: var(--primary);
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import images from '../../assets/images';
 
 const CARACTERISTICAS = [
@@ -32,7 +33,7 @@ export default function Nosotros() {
                 </div>
               ))}
             </div>
-            <a href="#menu" className="btn-red" data-menu-action="show-all"><i className="fas fa-book-open"></i>Ver menú completo</a>
+            <Link to="/productos" className="btn-red"><i className="fas fa-book-open"></i>Ver menú completo</Link>
           </div>
         </div>
       </div>

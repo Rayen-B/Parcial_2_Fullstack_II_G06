@@ -23,7 +23,7 @@ export default function Chefs() {
               <div className="chcard">
                 <div className="chimg">
                   <img src={chef.img} alt="" />
-                  <div className="chsoc"><a href="#"><i className="fab fa-instagram"></i></a><a href="#"><i className="fab fa-facebook-f"></i></a><a href="#"><i className="fab fa-twitter"></i></a></div>
+                  <div className="chsoc"><a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fab fa-instagram"></i></a><a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a><a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i className="fab fa-twitter"></i></a></div>
                 </div>
                 <div className="chbody">
                   <div className="chnm">{chef.nombre}</div>

@@ -10,11 +10,16 @@ const NAVEGACION = [
   { to: '/admin', icono: 'ti-dashboard', texto: 'Dashboard' },
   { to: '/admin/ordenes', icono: 'ti-receipt', texto: 'Órdenes' },
   { to: '/admin/productos', icono: 'ti-box', texto: 'Inventario' },
+  { to: '/admin/insumos', icono: 'ti-chef-hat', texto: 'Insumos' },
+  { to: '/admin/reportes', icono: 'ti-chart-bar', texto: 'Reportes' },
+  { to: '/admin/categorias', icono: 'ti-category', texto: 'Categorías', soloAdmin: true },
   { to: '/admin/usuarios', icono: 'ti-users', texto: 'Usuarios', soloAdmin: true }
 ];
 
 const GESTION = [
   { to: '/admin/producto-form', icono: 'ti-circle-plus', texto: 'Nuevo Producto' },
+  { to: '/admin/insumo-form', icono: 'ti-basket', texto: 'Nuevo Insumo' },
+  { to: '/admin/categoria-form', icono: 'ti-category-plus', texto: 'Nueva Categoría' },
   { to: '/admin/usuario-form', icono: 'ti-user-plus', texto: 'Nuevo Usuario' }
 ];
 
@@ -90,6 +95,16 @@ export default function AdminLayout({
           ))}
         </ul>
 
+        <div className="nav-section-title">Cuenta</div>
+        <ul className="list-unstyled mb-3">
+          <li>
+            <Link to="/admin/perfil" className={claseLink('/admin/perfil')}>
+              <i className="ti ti-user-circle"></i>
+              <span className="nav-text">Mi Perfil</span>
+            </Link>
+          </li>
+        </ul>
+
         <div className="sidebar-footer mt-auto">
           <div className="d-flex align-items-center mb-3">
             <img src={images['avatar/ryan']} alt="Avatar" className="avatar me-2" />
@@ -129,7 +144,7 @@ export default function AdminLayout({
           <div className="d-flex align-items-center gap-3">
             <div className="dropdown">
               <button className="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                Probar Rol
+                <i className="ti ti-user-cog me-1"></i> Probar Rol
               </button>
               <ul className="dropdown-menu dropdown-menu-end shadow-sm">
                 <li><button className="dropdown-item small" onClick={() => cambiarRolActivo('Administrador')}><i className=" text-primary me-2"></i> Administrador</button></li>
