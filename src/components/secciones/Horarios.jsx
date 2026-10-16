@@ -22,7 +22,7 @@ export default function Horarios() {
       <div className="container pos-rel-z2">
         <div className="text-center mb-5" data-aos="fade-up">
           <span className="slbl slbl-mint">Horario</span>
-          <h2 className="stitle text-white">Estamos a <span className="text-secondary">tu servicio</span></h2>
+          <h2 className="stitle text-white">Estamos a <span>tu servicio</span></h2>
           <div className="sline"></div>
         </div>
         <div className="row g-4 align-items-start">
@@ -30,7 +30,7 @@ export default function Horarios() {
             <div className="hrscard">
               {HORARIOS.map((h) => (
                 <div className="hrsrow" key={h.dias}>
-                  <span className="hrsday"><i className="fas fa-calendar-day me-2 text-secondary"></i>{h.dias}</span>
+                  <span className="hrsday"><i className="fas fa-calendar-day me-2"></i>{h.dias}</span>
                   <div className="d-flex align-items-center gap-2">
                     <div className={`hdot ${h.abierto ? 'on' : 'off'}`}></div>
                     <span className={`hrstime${h.abierto ? '' : ' text-red'}`}>{h.horario}</span>
@@ -49,10 +49,10 @@ export default function Horarios() {
           </div>
           <div className="col-lg-4" data-aos="fade-left">
             <div className="hrscard">
-              <h5 className="text-white mb-0"><i className="fas fa-map-marker-alt me-2 text-secondary"></i>Encuéntranos</h5>
+              <h5 className="text-white mb-0"><i className="fas fa-map-marker-alt me-2"></i>Encuéntranos</h5>
               {UBICACION.map((u) => (
                 <div className="hrsrow" key={u.titulo}>
-                  <span className="hrsday"><i className={`fas ${u.icono} me-2 text-secondary`}></i>{u.titulo}</span>
+                  <span className="hrsday"><i className={`fas ${u.icono} me-2`}></i>{u.titulo}</span>
                   <span className="hrstime text-sm-alt">{u.texto}</span>
                 </div>
               ))}

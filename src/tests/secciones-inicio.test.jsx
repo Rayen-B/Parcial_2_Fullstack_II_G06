@@ -131,9 +131,9 @@ describe('Horarios y entregas', () => {
 describe('Boletín (suscripción)', () => {
   const correoInput = () => screen.getByPlaceholderText(/dirección de correo/i);
 
-  it('el botón empieza diciendo "Subscríbete"', () => {
+  it('el botón empieza diciendo "Suscríbete"', () => {
     render(<Boletin />);
-    expect(screen.getByRole('button', { name: /subscríbete/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /suscríbete/i })).toBeTruthy();
   });
 
   it('con el campo vacío no se suscribe', () => {

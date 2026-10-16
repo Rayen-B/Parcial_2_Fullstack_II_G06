@@ -5,7 +5,8 @@ import { validarContacto, ASUNTOS_CONTACTO } from '../../utils/validaciones';
 
 const ASUNTOS = ASUNTOS_CONTACTO;
 
-export default function Contacto() {
+export default function Contacto({ comoPagina = false }) {
+  const Titulo = comoPagina ? 'h1' : 'h2';
   const exitoRef = useRef(null);
   const { valores, errores, enviando, enviado, cambiar, alSalir, alEnviar } = useFormulario(
     { nombre: '', correo: '', telefono: '', asunto: ASUNTOS[0], mensaje: '' },
@@ -21,7 +22,7 @@ export default function Contacto() {
       <div className="container">
         <div className="text-center mb-5" data-aos="fade-up">
           <span className="slbl">Ponte en contacto</span>
-          <h2 className="stitle">Contactos</h2>
+          <Titulo className="stitle">Contactos</Titulo>
           <div className="sline"></div>
           <p className="sdesc mx-auto max-w-480">¿Tienes una pregunta, comentarios o quieres planificar un evento especial? Nos encantaría saber de ti.</p>
         </div>

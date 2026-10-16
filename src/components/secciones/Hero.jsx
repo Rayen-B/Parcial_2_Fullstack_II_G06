@@ -115,7 +115,7 @@ export default function Hero({ onVerHistoria }) {
         <div className="mqtrack">
           {[
             'Pastelería Artesanal', 'Café de Especialidad', 'Tortas Caseras', 'Tartaletas', 'Infusiones & bebestibles',
-            'Recetas con cariño', 'Postres', 'Pasteleria artesanal', 'Café de Especialidad', 'Tortas caseras',
+            'Recetas con cariño', 'Postres', 'Pastelería artesanal', 'Café de Especialidad', 'Tortas caseras',
             'Tartaletas', 'Infusiones & bebestibles', 'Recetas con cariño', 'Postres'
           ].map((texto, i) => (
             <div className="mqitem" key={i}><i className="fas fa-circle"></i>{texto}</div>

@@ -3699,3 +3699,9 @@ footer {
   background: transparent;
   color: var(--primary);
 }
+
+/* Íconos de la sección de horarios */
+#hours .hrsday i,
+#hours h5 i {
+  color: var(--primary);
+}

@@ -18,7 +18,7 @@ export default function Boletin() {
     timer.current = setTimeout(() => setSuscrito(false), 3000);
   };
 
-  let contenidoBoton = <><i className="fas fa-paper-plane me-1"></i>Subscríbete</>;
+  let contenidoBoton = <><i className="fas fa-paper-plane me-1"></i>Suscríbete</>;
   if (suscrito) contenidoBoton = '¡Suscrito!';
   else if (usado) contenidoBoton = 'Suscribirse';
 
@@ -28,7 +28,7 @@ export default function Boletin() {
       <div className="container">
         <div className="nlw text-center" data-aos="zoom-in">
           <span className="slbl text-white-light">Mantente conectado</span>
-          <h2 className="mb-3 text-white">Suscríbete y obtén <span className="text-secondary">ofertas exclusivas</span></h2>
+          <h2 className="mb-3 text-white">Suscríbete y obtén <span>ofertas exclusivas</span></h2>
           <p className="mb-4 text-white-muted">Obtén 15% de descuento en tu primer pedido más acceso anticipado a nuevas preparaciones del menú</p>
           <div className="nl-form-wrap">
             <input className="nlinput" type="email" id="nlEmail" placeholder="Ingresa tu dirección de correo electrónico..." value={correo} onChange={(e) => setCorreo(e.target.value)} />
@@ -36,7 +36,7 @@ export default function Boletin() {
               {contenidoBoton}
             </button>
           </div>
-          <p className="text-white-faded text-sm"><i className="fas fa-lock me-1"></i>Sin spam, desuscríbete en cualquier momento.</p>
+          <p className="text-white-faded text-sm mt-3 mb-0"><i className="fas fa-lock me-1"></i>Sin spam, desuscríbete en cualquier momento.</p>
         </div>
       </div>
     </section>

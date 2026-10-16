@@ -15,7 +15,7 @@ export default function Historia() {
       <div className="container">
         <div className="text-center mb-5" data-aos="fade-up">
           <span className="slbl">Nuestra trayectoria</span>
-          <h2 className="stitle">Una historia de <span>Pasteleria</span></h2>
+          <h2 className="stitle">Una historia de <span>Pastelería</span></h2>
           <div className="sline"></div>
           <p className="sdesc mx-auto max-w-480">Desde la primera receta hasta ser el refugio dulce favorito de la ciudad: una historia escrita a puras huellitas y pasión.</p>
         </div>

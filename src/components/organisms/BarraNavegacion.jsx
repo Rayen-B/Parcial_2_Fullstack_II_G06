@@ -52,7 +52,7 @@ export default function BarraNavegacion() {
             <div className="bico"><img src={images['logopapita']} alt="Papita Dulce logo" /></div>
             <div>
               <div className="bname">Papita<span>Dulce</span></div>
-              <div className="bsub">Pasteleria &amp; Cafeteria</div>
+              <div className="bsub">Pastelería &amp; Cafetería</div>
             </div>
           </div>
         </Link>
