@@ -510,15 +510,15 @@ export const ORDENES_DEFAULT = [
     cliente: "Alan Brito Delgado",
     correo: "alan.brito@duoc.cl",
     estado: "Enviado",
-    montoTotal: "$45.000",
-    total: 45000,
-    items: "1x Torta Selva Negra ($45.000)",
+    montoTotal: "$39.800",
+    total: 39800,
+    items: "2x Torta Selva Negra ($39.800)",
     hora: "11:24",
     telefono: "+56 9 8765 4321",
     tipoEntrega: "despacho",
     entrega: "Av. España 123, Santiago",
     metodoPago: "tarjeta",
-    detalle: [{ nombre: "Torta Selva Negra", cantidad: 1, precio: 45000 }]
+    detalle: [{ codigo: "TC002", nombre: "Torta Selva Negra", cantidad: 2, precio: 19900 }]
   },
   {
     id: "ORD-1002",
@@ -527,15 +527,15 @@ export const ORDENES_DEFAULT = [
     cliente: "Lola Mento Rojas",
     correo: "lola.mento@profesor.duoc.cl",
     estado: "Pendiente",
-    montoTotal: "$38.000",
-    total: 38000,
-    items: "1x Torta Panqueque de Naranja ($38.000)",
+    montoTotal: "$16.900",
+    total: 16900,
+    items: "1x Torta Panqueque Naranja ($16.900)",
     hora: "16:05",
     telefono: "+56 9 7654 3210",
     tipoEntrega: "despacho",
     entrega: "Av. Providencia 456, Providencia",
     metodoPago: "transferencia",
-    detalle: [{ nombre: "Torta Panqueque de Naranja", cantidad: 1, precio: 38000 }]
+    detalle: [{ codigo: "TC001", nombre: "Torta Panqueque Naranja", cantidad: 1, precio: 16900 }]
   },
   {
     id: "ORD-1003",
@@ -544,15 +544,15 @@ export const ORDENES_DEFAULT = [
     cliente: "Armando Esteban Quito",
     correo: "armando.quito@gmail.com",
     estado: "Cancelado",
-    montoTotal: "$25.000",
-    total: 25000,
-    items: "1x Empolvados ($25.000)",
+    montoTotal: "$16.800",
+    total: 16800,
+    items: "6x Empolvados ($16.800)",
     hora: "10:40",
     telefono: "+56 9 6543 2109",
     tipoEntrega: "retiro",
     entrega: "Retiro en tienda",
     metodoPago: "efectivo",
-    detalle: [{ nombre: "Empolvados", cantidad: 1, precio: 25000 }]
+    detalle: [{ codigo: "TF005", nombre: "Empolvados", cantidad: 6, precio: 2800 }]
   },
   {
     id: "ORD-1004",
@@ -561,15 +561,15 @@ export const ORDENES_DEFAULT = [
     cliente: "Esteban Dido Bravo",
     correo: "esteban.dido@duoc.cl",
     estado: "Procesando",
-    montoTotal: "$42.000",
-    total: 42000,
-    items: "1x Torta de Trufa ($42.000)",
+    montoTotal: "$37.800",
+    total: 37800,
+    items: "2x Torta Trufa ($37.800)",
     hora: "18:32",
     telefono: "+56 9 5432 1098",
     tipoEntrega: "retiro",
     entrega: "Retiro en tienda",
     metodoPago: "tarjeta",
-    detalle: [{ nombre: "Torta de Trufa", cantidad: 1, precio: 42000 }]
+    detalle: [{ codigo: "TL004", nombre: "Torta Trufa", cantidad: 2, precio: 18900 }]
   },
   {
     id: "ORD-1005",
@@ -578,15 +578,15 @@ export const ORDENES_DEFAULT = [
     cliente: "Elba Surita Valdés",
     correo: "elba.surita@gmail.com",
     estado: "Enviado",
-    montoTotal: "$36.000",
-    total: 36000,
-    items: "1x Torta Tres Leches ($36.000)",
+    montoTotal: "$17.500",
+    total: 17500,
+    items: "1x Torta Tres Leches ($17.500)",
     hora: "13:15",
     telefono: "+56 9 4321 0987",
     tipoEntrega: "despacho",
     entrega: "Los Aromos 789, Ñuñoa",
     metodoPago: "tarjeta",
-    detalle: [{ nombre: "Torta Tres Leches", cantidad: 1, precio: 36000 }]
+    detalle: [{ codigo: "TT003", nombre: "Torta Tres Leches", cantidad: 1, precio: 17500 }]
   }
 ];
 

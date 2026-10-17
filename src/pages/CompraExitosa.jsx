@@ -6,9 +6,9 @@ import { obtenerOrden } from '../services/db';
 
 // Vista /compra/exitosa/:id con el resumen de la compra
 export default function CompraExitosa() {
-  useSeo({ titulo: 'Compra realizada', noindex: true });
   const { id } = useParams();
   const orden = obtenerOrden(id);
+  useSeo({ titulo: orden ? 'Compra realizada' : 'Orden no encontrada', noindex: true });
   const [emailEnviado, setEmailEnviado] = useState(false);
 
   if (!orden) {

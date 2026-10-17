@@ -6,10 +6,10 @@ import { obtenerOrden } from '../services/db';
 
 // Vista /compra/error/:id cuando el pago fue rechazado. El carrito se conserva para reintentar.
 export default function CompraError() {
-  useSeo({ titulo: 'No se pudo realizar el pago', noindex: true });
   const { id } = useParams();
   const { state } = useLocation();
   const orden = obtenerOrden(id);
+  useSeo({ titulo: orden ? 'No se pudo realizar el pago' : 'Orden no encontrada', noindex: true });
 
   if (!orden) {
     return <section className="container text-center"><h1 className="stitle">Orden no encontrada</h1><Link to="/productos" className="btn-red">Volver a la tienda</Link></section>;

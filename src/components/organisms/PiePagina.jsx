@@ -28,11 +28,11 @@ export default function PiePagina() {
             <div className="fnm">Papita<span>Dulce</span></div>
             <p className="fdesc">Reunimos los mejores sabores del mundo en una experiencia rápida, amable y asequible. Cada comida está elaborada con amor.</p>
             <div className="fsoc">
-              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-facebook-f"></i></a>
-              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-instagram"></i></a>
-              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-twitter"></i></a>
-              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-youtube"></i></a>
-              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Red social"><i className="fab fa-tiktok"></i></a>
+              <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
+              <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
+              <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
+              <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i className="fab fa-tiktok"></i></a>
             </div>
           </div>
           <div className="col-sm-6 col-lg-2">

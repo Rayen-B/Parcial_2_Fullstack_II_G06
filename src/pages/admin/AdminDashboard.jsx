@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/organisms/AdminLayout';
 import { obtenerProductos, obtenerUsuarios, obtenerOrdenes } from '../../services/storage';
@@ -9,16 +9,10 @@ import { esProductoCritico, disponibleProducto, stockVitrina, calcularPreparable
 import { ordenarProductos } from './AdminProductos';
 
 export default function AdminDashboard() {
-  const [productos, setProductos] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
-  const [ordenes, setOrdenes] = useState([]);
+  const [productos] = useState(obtenerProductos);
+  const [usuarios] = useState(obtenerUsuarios);
+  const [ordenes] = useState(obtenerOrdenes);
   const ocultarSoloAdmin = useSoloAdmin();
-
-  useEffect(() => {
-    setProductos(obtenerProductos());
-    setUsuarios(obtenerUsuarios());
-    setOrdenes(obtenerOrdenes());
-  }, []);
 
   const totalProductos = productos.length;
   // crítico si lo disponible (vitrina + preparables) está en o bajo su stock crítico

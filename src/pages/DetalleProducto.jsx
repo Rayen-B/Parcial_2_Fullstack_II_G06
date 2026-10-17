@@ -33,7 +33,7 @@ export default function DetalleProducto() {
   if (!producto) {
     return (
       <Container className="py-5 text-center">
-        <h4 className="stitle mb-3">Producto no encontrado</h4>
+        <h1 className="stitle mb-3">Producto no encontrado</h1>
         <Link to="/productos" className="btn-red">
           <i className="fas fa-utensils me-1"></i> Volver a los productos
         </Link>

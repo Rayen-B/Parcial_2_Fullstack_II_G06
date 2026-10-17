@@ -1,7 +1,6 @@
 import React from 'react';
 import { detalleDeOrden, formatearMonto } from '../../services/db';
-
-const METODOS = { tarjeta: 'Tarjeta de crédito / débito', transferencia: 'Transferencia bancaria', efectivo: 'Efectivo contra entrega' };
+import { textoMetodoPago } from '../../utils/ordenes';
 
 // Resumen de una orden: datos del cliente, entrega, productos y total. Se usa en "compra exitosa" y "pago con error".
 export default function ResumenOrden({ orden }) {
@@ -15,7 +14,7 @@ export default function ResumenOrden({ orden }) {
         {orden.telefono && <div className="col-sm-6"><span className="text-muted">Teléfono:</span> <strong>{orden.telefono}</strong></div>}
         <div className="col-sm-6"><span className="text-muted">Fecha:</span> <strong>{orden.fecha}</strong></div>
         <div className="col-sm-6"><span className="text-muted">Entrega:</span> <strong>{entrega}</strong></div>
-        {orden.metodoPago && <div className="col-sm-6"><span className="text-muted">Pago:</span> <strong>{METODOS[orden.metodoPago] || orden.metodoPago}</strong></div>}
+        {orden.metodoPago && <div className="col-sm-6"><span className="text-muted">Pago:</span> <strong>{textoMetodoPago(orden.metodoPago)}</strong></div>}
       </div>
       <div className="table-responsive">
         <table className="table align-middle">
