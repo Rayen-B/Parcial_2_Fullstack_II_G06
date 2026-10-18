@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import ErrorCampo from '../atoms/ErrorCampo';
 import { useFormulario } from '../../hooks/useFormulario';
 import { validarContacto, ASUNTOS_CONTACTO } from '../../utils/validaciones';
+import IconoX from '../atoms/IconoX';
 
 const ASUNTOS = ASUNTOS_CONTACTO;
 
@@ -51,7 +52,7 @@ export default function Contacto({ comoPagina = false }) {
               <div className="ctsocrow">
                 <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
                 <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
-                <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X"><IconoX /></a>
                 <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Youtube"><i className="fab fa-youtube"></i></a>
               </div>
             </div>

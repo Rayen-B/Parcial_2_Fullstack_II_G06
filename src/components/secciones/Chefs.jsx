@@ -1,5 +1,6 @@
 import React from 'react';
 import images from '../../assets/images';
+import IconoX from '../atoms/IconoX';
 
 const CHEFS = [
   { img: images['chefs/chef1'], nombre: 'Ramon Perez', rol: 'Jefe de cocina', experiencia: '12 años de experiencia', delay: 0 },
@@ -23,7 +24,7 @@ export default function Chefs() {
               <div className="chcard">
                 <div className="chimg">
                   <img src={chef.img} alt="" />
-                  <div className="chsoc"><a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fab fa-instagram"></i></a><a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a><a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i className="fab fa-twitter"></i></a></div>
+                  <div className="chsoc"><a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fab fa-instagram"></i></a><a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a><a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X"><IconoX /></a></div>
                 </div>
                 <div className="chbody">
                   <div className="chnm">{chef.nombre}</div>

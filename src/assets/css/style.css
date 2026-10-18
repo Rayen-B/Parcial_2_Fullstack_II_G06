@@ -365,6 +365,27 @@ section {
   color: #fff;
 }
 
+/* Botón secundario de la tienda: mismo tamaño que .btn-red, solo con borde */
+.btn-outline-tienda {
+  background: transparent;
+  color: var(--secondary);
+  border: 2px solid var(--primary);
+  border-radius: 50px;
+  padding: 12px 30px;
+  font-weight: 600;
+  font-size: 0.93rem;
+  transition: 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+}
+.btn-outline-tienda:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
 /* ===================== HERO ===================== */
 #hero {
   background: var(--cream);
