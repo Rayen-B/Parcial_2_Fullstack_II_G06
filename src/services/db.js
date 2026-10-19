@@ -1,10 +1,11 @@
 // Datos de la tienda con operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
 import * as storage from './storage';
 import { obtenerInsumos, guardarInsumos } from './insumos';
-import { disponibleProducto, esProductoCritico, descontarVenta } from '../utils/stock';
+import { disponibleProducto, esProductoCritico, descontarVenta, devolverVenta } from '../utils/stock';
 
-export const ESTADOS_ORDEN = ['Pendiente', 'Procesando', 'Enviado', 'Cancelado', 'Pago rechazado'];
-export const ESTADOS_SIN_INGRESO = ['Cancelado', 'Pago rechazado'];
+export const ESTADOS_ORDEN = ['Pendiente', 'Pendiente de pago', 'Procesando', 'Enviado', 'Cancelado', 'Pago rechazado'];
+// "Pendiente de pago" = transferencia aún no confirmada: todavía no es un ingreso
+export const ESTADOS_SIN_INGRESO = ['Cancelado', 'Pago rechazado', 'Pendiente de pago'];
 export const DESCUENTO_MINIMO_OFERTA = 20; // % mínimo de descuento para aparecer en "Ofertas"
 
 const resultado = (exito, datos = {}) => ({ exito, ...datos });
@@ -107,7 +108,7 @@ export function descontarStock(items) {
   if (!resultadoVenta.ok) return resultado(false, { mensaje: `Ya no hay stock suficiente de ${resultadoVenta.faltante}.`, faltante: resultadoVenta.faltante });
   storage.guardarProductos(resultadoVenta.productos);
   guardarInsumos(resultadoVenta.insumos);
-  return resultado(true, { productos: resultadoVenta.productos, insumos: resultadoVenta.insumos });
+  return resultado(true, { productos: resultadoVenta.productos, insumos: resultadoVenta.insumos, movimientos: resultadoVenta.movimientos });
 }
 
 // Revisa si alcanza el stock para una compra, sin descontar nada
@@ -224,7 +225,9 @@ export function detalleDeOrden(orden) {
 // Fecha y hora local (toISOString usa la hora UTC y de noche puede cambiar el día)
 const fechaLocal = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-export function crearOrden({ cliente, correo, telefono = '', run = '', entrega, tipoEntrega, metodoPago, items, estado = 'Pendiente' }) {
+// datosPago (opcional): { pagaCon, vuelto, motivoRechazo, codigoMotivo } se guarda en la orden.
+// Transferencia: se agrega referencia (n° de orden) y plazo de 24 horas. Efectivo: código de pedido.
+export function crearOrden({ cliente, correo, telefono = '', run = '', entrega, tipoEntrega, metodoPago, items, estado = 'Pendiente', datosPago = {}, movimientoStock = null }) {
   if (!items || items.length === 0) return resultado(false, { mensaje: 'La orden no tiene productos.' });
   const total = items.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
   const ahora = new Date();
@@ -247,6 +250,13 @@ export function crearOrden({ cliente, correo, telefono = '', run = '', entrega, 
     detalle: items.map((i) => ({ codigo: i.codigo || i.id, nombre: i.nombre, precio: i.precio, cantidad: i.cantidad, variante: i.variante || '' })),
     items: items.map((i) => `${i.cantidad}x ${i.nombre} (${formatearMonto(i.precio * i.cantidad)})`).join('; ')
   };
+  if (metodoPago === 'transferencia') {
+    orden.referenciaPago = id;
+    orden.plazoPago = new Date(ahora.getTime() + 24 * 3600 * 1000).toISOString();
+  }
+  if (metodoPago === 'efectivo') orden.codigoPedido = 'PD-' + id.replace(/\D/g, '').slice(-4);
+  Object.assign(orden, datosPago);
+  if (movimientoStock) orden.movimientoStock = movimientoStock;
   storage.guardarOrdenes([...listarOrdenes(), orden]);
   return resultado(true, { orden });
 }
@@ -258,6 +268,36 @@ export function actualizarEstadoOrden(id, estado) {
   const orden = { ...existente, estado };
   storage.guardarOrdenes(listarOrdenes().map((o) => (o.id === existente.id ? orden : o)));
   return resultado(true, { orden });
+}
+
+// Cancela una orden y devuelve al inventario lo que se había descontado (vitrina e insumos).
+// Las órdenes antiguas sin registro de movimientos devuelven sus unidades completas a la vitrina.
+export function cancelarOrden(id, motivo = '') {
+  const existente = obtenerOrden(id);
+  if (!existente) return resultado(false, { mensaje: 'La orden no existe.' });
+  if (existente.estado === 'Cancelado' || existente.estado === 'Pago rechazado') {
+    return resultado(false, { mensaje: 'La orden ya estaba cancelada.' });
+  }
+  const movimientos = existente.movimientoStock || {
+    vitrina: detalleDeOrden(existente)
+      .filter((d) => d.codigo && d.variante !== 'trozo')
+      .reduce((acc, d) => ({ ...acc, [d.codigo]: (acc[d.codigo] || 0) + Number(d.cantidad) }), {}),
+    insumos: {}
+  };
+  const devuelto = devolverVenta(listarProductos(), obtenerInsumos(), movimientos);
+  storage.guardarProductos(devuelto.productos);
+  guardarInsumos(devuelto.insumos);
+  const orden = { ...existente, estado: 'Cancelado', motivoCancelacion: motivo, fechaCancelacion: new Date().toISOString() };
+  delete orden.movimientoStock;
+  storage.guardarOrdenes(listarOrdenes().map((o) => (o.id === existente.id ? orden : o)));
+  return resultado(true, { orden });
+}
+
+// Cancela las transferencias que pasaron su plazo sin pagarse. Devuelve cuántas se cancelaron.
+export function cancelarTransferenciasVencidas(ahora = new Date()) {
+  const vencidas = listarOrdenes().filter((o) => o.estado === 'Pendiente de pago' && o.plazoPago && new Date(o.plazoPago) < ahora);
+  vencidas.forEach((o) => cancelarOrden(o.id, 'Plazo de pago vencido'));
+  return vencidas.length;
 }
 
 export function eliminarOrden(id) {

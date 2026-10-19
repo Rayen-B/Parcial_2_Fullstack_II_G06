@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  productoDeLinea, filtrarPorPeriodo, resumenVentas, productosMasVendidos,
+  productoDeLinea, resumenVentas, productosMasVendidos,
   ventasPorCategoria, ventasPorMetodoPago, ordenesPorEstado
 } from '../utils/reportes';
 import { detalleOrden, resumenProductos, entregaOrden, desgloseIva, numeroOrden, fechaChilena, textoMetodoPago } from '../utils/ordenes';
@@ -29,22 +29,6 @@ describe('productoDeLinea()', () => {
 
   it('devuelve null si el producto no existe', () => {
     expect(productoDeLinea({ nombre: 'Empolvados' }, productos)).toBeNull();
-  });
-});
-
-describe('filtrarPorPeriodo()', () => {
-  const hoy = new Date(2026, 9, 14);
-
-  it('"todo" no filtra', () => {
-    expect(filtrarPorPeriodo(ordenes, 'todo', hoy)).toHaveLength(3);
-  });
-
-  it('últimos 7 días incluye hoy', () => {
-    expect(filtrarPorPeriodo(ordenes, '7', hoy).map((o) => o.id)).toEqual(['A']);
-  });
-
-  it('"mes" desde el día 1 del mes actual', () => {
-    expect(filtrarPorPeriodo(ordenes, 'mes', hoy).map((o) => o.id)).toEqual(['A', 'B']);
   });
 });
 

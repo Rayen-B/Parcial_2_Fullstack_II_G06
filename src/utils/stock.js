@@ -38,9 +38,11 @@ export function disponiblePorFactor(producto, insumos, factor = 1) {
 
 // Descuenta una venta: las unidades completas salen primero de la vitrina y el resto se prepara
 // con los insumos; los trozos siempre se preparan. items: [{ codigo, factor, cantidad, nombre }]
+// "movimientos" registra cuánto salió de la vitrina y de cada insumo, para poder devolverlo.
 export function descontarVenta(productos, insumos, items) {
   const nuevosProductos = productos.map((p) => ({ ...p }));
   const nuevosInsumos = insumos.map((i) => ({ ...i }));
+  const movimientos = { vitrina: {}, insumos: {} };
 
   for (const item of items) {
     const producto = nuevosProductos.find((p) => p.codigo === item.codigo);
@@ -52,6 +54,7 @@ export function descontarVenta(productos, insumos, items) {
       const desdeVitrina = Math.min(stockVitrina(producto), porPreparar);
       producto.stock = stockVitrina(producto) - desdeVitrina;
       porPreparar -= desdeVitrina;
+      if (desdeVitrina > 0) movimientos.vitrina[producto.codigo] = (movimientos.vitrina[producto.codigo] || 0) + desdeVitrina;
     }
     if (porPreparar <= 0) continue;
 
@@ -60,10 +63,22 @@ export function descontarVenta(productos, insumos, items) {
     }
     producto.receta.forEach(({ insumoId, cantidad }) => {
       const insumo = nuevosInsumos.find((i) => i.id === insumoId);
-      insumo.stock = Math.max(0, redondear(insumo.stock - Number(cantidad) * factor * porPreparar));
+      const usado = Math.min(insumo.stock, redondear(Number(cantidad) * factor * porPreparar));
+      insumo.stock = redondear(insumo.stock - usado);
+      movimientos.insumos[insumoId] = redondear((movimientos.insumos[insumoId] || 0) + usado);
     });
   }
-  return { ok: true, productos: nuevosProductos, insumos: nuevosInsumos };
+  return { ok: true, productos: nuevosProductos, insumos: nuevosInsumos, movimientos };
+}
+
+// Devuelve al inventario lo que se descontó en una venta (movimientos de descontarVenta)
+export function devolverVenta(productos, insumos, movimientos) {
+  const vitrina = movimientos?.vitrina || {};
+  const usados = movimientos?.insumos || {};
+  return {
+    productos: productos.map((p) => (vitrina[p.codigo] ? { ...p, stock: stockVitrina(p) + vitrina[p.codigo] } : p)),
+    insumos: insumos.map((i) => (usados[i.id] ? { ...i, stock: redondear(i.stock + usados[i.id]) } : i))
+  };
 }
 
 // Cuántas unidades más se pueden agregar de un producto, considerando lo que ya está en el carrito

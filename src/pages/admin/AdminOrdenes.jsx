@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
 import AdminLayout from '../../components/organisms/AdminLayout';
 import { obtenerOrdenes } from '../../services/storage';
+import { actualizarEstadoOrden, cancelarOrden, cancelarTransferenciasVencidas } from '../../services/db';
+import { formatearPlazo } from '../../utils/pago';
 import BoletaOrden from '../../components/organisms/BoletaOrden';
 import { detalleOrden, resumenProductos, entregaOrden, textoMetodoPago, numeroOrden, fechaChilena } from '../../utils/ordenes';
 
@@ -9,6 +11,7 @@ import { detalleOrden, resumenProductos, entregaOrden, textoMetodoPago, numeroOr
 const ESTADOS = {
   Enviado: { clase: 'badge-soft-success', icono: 'ti ti-truck me-1' },
   Pendiente: { clase: 'badge-soft-warning', icono: 'ti ti-clock me-1' },
+  'Pendiente de pago': { clase: 'badge-soft-warning', icono: 'ti ti-building-bank me-1' },
   Cancelado: { clase: 'badge-soft-danger', icono: 'ti ti-x me-1' },
   Procesando: { clase: 'badge-soft-info', icono: 'ti ti-loader me-1' },
   'Pago rechazado': { clase: 'badge-soft-danger', icono: 'ti ti-credit-card-off me-1' }
@@ -17,7 +20,7 @@ const ESTADOS = {
 // En el modal la insignia solo muestra el texto
 export function claseEstadoModal(estado) {
   if (estado === 'Enviado') return 'badge-soft-success';
-  if (estado === 'Pendiente') return 'badge-soft-warning';
+  if (estado === 'Pendiente' || estado === 'Pendiente de pago') return 'badge-soft-warning';
   if (estado === 'Cancelado' || estado === 'Pago rechazado') return 'badge-soft-danger';
   return 'badge-soft-info';
 }
@@ -45,12 +48,31 @@ export default function AdminOrdenes() {
   const [busqueda, setBusqueda] = useState('');
   const [ordenModal, setOrdenModal] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [confirmandoCancelacion, setConfirmandoCancelacion] = useState(false);
 
   const verOrden = (ord) => {
     setOrdenModal(ord);
+    setConfirmandoCancelacion(false);
     setMostrarModal(true);
   };
   const cerrarModal = () => setMostrarModal(false);
+
+  // Transferencia recibida: la orden deja de estar "Pendiente de pago" y pasa a "Pendiente" (ya cuenta como venta)
+  const confirmarPago = () => {
+    const resp = actualizarEstadoOrden(ordenModal.id, 'Pendiente');
+    if (!resp.exito) return;
+    setOrdenModal(resp.orden);
+    setOrdenes(ordenarRecientes(obtenerOrdenes()));
+  };
+
+  // Cancela la orden y devuelve su stock (vitrina e ingredientes)
+  const confirmarCancelacion = () => {
+    const resp = cancelarOrden(ordenModal.id, 'Cancelada por la tienda');
+    setConfirmandoCancelacion(false);
+    if (!resp.exito) return;
+    setOrdenModal(resp.orden);
+    setOrdenes(ordenarRecientes(obtenerOrdenes()));
+  };
 
   // Boleta imprimible
   const [mostrarBoleta, setMostrarBoleta] = useState(false);
@@ -61,6 +83,7 @@ export default function AdminOrdenes() {
   };
 
   useEffect(() => {
+    cancelarTransferenciasVencidas();
     setOrdenes(ordenarRecientes(obtenerOrdenes()));
   }, []);
 
@@ -206,10 +229,27 @@ export default function AdminOrdenes() {
                   <span className="text-muted">Entrega:</span>{' '}
                   <span className="ms-1">{entregaOrden(ordenModal).tipo} — {entregaOrden(ordenModal).direccion}</span>
                 </div>
-                <div>
+                <div className="mb-2">
                   <span className="text-muted">Método de pago:</span>{' '}
-                  <span className="ms-1">{textoMetodoPago(ordenModal.metodoPago)}</span>
+                  <span className="ms-1">{textoMetodoPago(ordenModal.metodoPago)}{ordenModal.tipoTarjeta ? ` · ${ordenModal.tipoTarjeta === 'debito' ? 'Débito' : 'Crédito'} •••• ${ordenModal.ultimos4}${ordenModal.cuotas > 1 ? ` · ${ordenModal.cuotas} cuotas` : ''}` : ''}</span>
                 </div>
+                {ordenModal.estado === 'Pendiente de pago' && ordenModal.plazoPago && (
+                  <div className="mb-2" id="modal-ord-plazo">
+                    <span className="text-muted">Transferir antes de:</span> <b className="ms-1">{formatearPlazo(ordenModal.plazoPago)}</b>
+                    <span className="text-muted"> · Referencia {ordenModal.referenciaPago}</span>
+                  </div>
+                )}
+                {ordenModal.codigoPedido && (
+                  <div className="mb-2"><span className="text-muted">Código de pedido:</span> <b className="ms-1 font-monospace">{ordenModal.codigoPedido}</b>
+                    {ordenModal.pagaCon ? <span className="text-muted"> · Paga con ${Number(ordenModal.pagaCon).toLocaleString('es-CL')} (vuelto ${Number(ordenModal.vuelto || 0).toLocaleString('es-CL')})</span> : null}
+                  </div>
+                )}
+                {ordenModal.estado === 'Cancelado' && ordenModal.motivoCancelacion && (
+                  <div className="text-danger" id="modal-ord-cancelacion"><span className="text-muted">Motivo de la cancelación:</span> <b className="ms-1">{ordenModal.motivoCancelacion}</b></div>
+                )}
+                {ordenModal.estado === 'Pago rechazado' && ordenModal.motivoRechazo && (
+                  <div className="text-danger" id="modal-ord-motivo"><span className="text-muted">Motivo del rechazo:</span> <b className="ms-1">{ordenModal.motivoRechazo}</b></div>
+                )}
               </div>
               <h6 className="fw-bold text-principal mb-2 small text-uppercase">Productos Comprados</h6>
               <div className="list-group list-group-flush border rounded-3 mb-3 small" id="modal-ord-items">
@@ -225,12 +265,30 @@ export default function AdminOrdenes() {
                 <span id="modal-ord-total" className="fw-bold fs-5 text-principal">{montoTexto(ordenModal)}</span>
               </div>
             </div>
+            {confirmandoCancelacion ? (
+            <div className="modal-footer bg-light border-0 py-2" id="confirmar-cancelacion">
+              <span className="small text-muted me-auto">¿Cancelar la orden? El stock vuelve al inventario.</span>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setConfirmandoCancelacion(false)}><i className="ti ti-arrow-left me-1"></i> No</button>
+              <button type="button" id="si-cancelar-orden" className="btn btn-danger btn-sm" onClick={confirmarCancelacion}><i className="ti ti-ban me-1"></i> Sí, cancelar</button>
+            </div>
+            ) : (
             <div className="modal-footer bg-light border-0 py-2">
               <button type="button" className="btn btn-secondary btn-sm" onClick={cerrarModal}><i className="ti ti-x me-1"></i> Cerrar</button>
+              {ordenModal.estado === 'Pendiente de pago' && (
+                <>
+                  <button type="button" id="cancelar-orden" className="btn btn-outline-danger btn-sm" onClick={() => setConfirmandoCancelacion(true)}>
+                    <i className="ti ti-ban me-1"></i> Cancelar orden
+                  </button>
+                  <button type="button" id="confirmar-pago" className="btn btn-success btn-sm" onClick={confirmarPago}>
+                    <i className="ti ti-check me-1"></i> Confirmar pago recibido
+                  </button>
+                </>
+              )}
               <button type="button" className="btn btn-pasteleria btn-sm" onClick={() => verBoleta(ordenModal)}>
                 <i className="ti ti-receipt-2 me-1"></i> Ver Boleta
               </button>
             </div>
+            )}
           </>
         )}
       </Modal>

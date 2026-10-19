@@ -19,6 +19,8 @@ export default function InsigniaEstado({ estado, stock, stockCritico }) {
       return <Badge bg="success">Completado</Badge>;
     case 'Pendiente':
       return <Badge bg="warning" text="dark">Pendiente</Badge>;
+    case 'Pendiente de pago':
+      return <Badge bg="warning" text="dark">Pendiente de pago</Badge>;
     case 'Cancelado':
       return <Badge bg="secondary">Cancelado</Badge>;
     default:

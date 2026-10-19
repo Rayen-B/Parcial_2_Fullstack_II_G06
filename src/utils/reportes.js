@@ -14,17 +14,6 @@ export function productoDeLinea(linea, productos) {
   return productos.find((p) => normalizar(p.nombre) === nombre) || null;
 }
 
-// Órdenes dentro del período (días hacia atrás desde hoy; 'mes' = mes actual; 'todo' = sin filtro)
-export function filtrarPorPeriodo(ordenes, periodo, hoy = new Date()) {
-  if (periodo === 'todo') return ordenes;
-  const fechaTexto = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  let desde;
-  if (periodo === 'mes') desde = fechaTexto(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
-  else desde = fechaTexto(new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - (Number(periodo) - 1)));
-  const hasta = fechaTexto(hoy);
-  return ordenes.filter((o) => o.fecha >= desde && o.fecha <= hasta);
-}
-
 // Totales generales de ventas
 export function resumenVentas(ordenes) {
   const total = ordenes.reduce((t, o) => t + (Number(o.total) || 0), 0);

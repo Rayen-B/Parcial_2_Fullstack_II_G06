@@ -7,18 +7,11 @@ import { disponibleProducto, esProductoCritico, stockVitrina } from '../../utils
 import { ordenarProductos } from './AdminProductos';
 import { claseEstadoModal } from './AdminOrdenes';
 import {
-  filtrarPorPeriodo, resumenVentas, productosMasVendidos, ventasPorCategoria,
+  resumenVentas, productosMasVendidos, ventasPorCategoria,
   ventasPorMetodoPago, ventasPorEntrega, ordenesPorEstado
 } from '../../utils/reportes';
 
-const PERIODOS = [
-  { valor: 'todo', texto: 'Todo el historial' },
-  { valor: '7', texto: 'Últimos 7 días' },
-  { valor: '30', texto: 'Últimos 30 días' },
-  { valor: 'mes', texto: 'Este mes' }
-];
-
-const ESTADOS_SIN_VENTA = ['Cancelado', 'Pago rechazado'];
+const ESTADOS_SIN_VENTA = ['Cancelado', 'Pago rechazado', 'Pendiente de pago'];
 
 const pesos = (n) => '$' + Math.round(n).toLocaleString('es-CL');
 
@@ -40,7 +33,7 @@ function TarjetaMetrica({ icono, claseIcono, titulo, valor, id }) {
 
 // Lista de barras horizontales con monto y porcentaje
 function ListaBarras({ datos, detalle }) {
-  if (!datos.length) return <p className="text-muted small mb-0">Sin ventas en este período.</p>;
+  if (!datos.length) return <p className="text-muted small mb-0">Sin ventas registradas.</p>;
   return datos.map((d) => (
     <div key={d.nombre} className="mb-3">
       <div className="d-flex justify-content-between small mb-1">
@@ -59,16 +52,14 @@ export default function AdminReportes() {
   const [ordenes] = useState(obtenerOrdenes);
   const [productos] = useState(obtenerProductos);
   const [insumos] = useState(obtenerInsumos);
-  const [periodo, setPeriodo] = useState('todo');
   const [incluirCanceladas, setIncluirCanceladas] = useState(false);
 
-  const delPeriodo = filtrarPorPeriodo(ordenes, periodo);
   // Las órdenes canceladas o con pago rechazado no son ventas
-  const validas = incluirCanceladas ? delPeriodo : delPeriodo.filter((o) => !ESTADOS_SIN_VENTA.includes(o.estado));
+  const validas = incluirCanceladas ? ordenes : ordenes.filter((o) => !ESTADOS_SIN_VENTA.includes(o.estado));
   const resumen = resumenVentas(validas);
   const ranking = productosMasVendidos(validas, productos);
   const maxUnidades = Math.max(1, ...ranking.map((r) => r.unidades));
-  const estados = ordenesPorEstado(delPeriodo);
+  const estados = ordenesPorEstado(ordenes);
 
   const criticos = ordenarProductos(productos.filter((p) => esProductoCritico(p, insumos)), 'prioridad', insumos);
   const agotados = productos.filter((p) => disponibleProducto(p, insumos) <= 0).length;
@@ -77,9 +68,6 @@ export default function AdminReportes() {
 
   const filtros = (
     <div className="d-flex gap-3 flex-wrap align-items-center justify-content-sm-end mb-3">
-      <select className="form-select form-select-sm" style={{ width: 'auto' }} id="periodo-reporte" aria-label="Período del reporte" value={periodo} onChange={(e) => setPeriodo(e.target.value)}>
-        {PERIODOS.map((p) => <option key={p.valor} value={p.valor}>{p.texto}</option>)}
-      </select>
       <div className="form-check form-switch mb-0 small">
         <input className="form-check-input" type="checkbox" role="switch" id="incluir-canceladas" checked={incluirCanceladas} onChange={(e) => setIncluirCanceladas(e.target.checked)} />
         <label className="form-check-label" htmlFor="incluir-canceladas">Incluir canceladas y rechazadas</label>
@@ -117,7 +105,7 @@ export default function AdminReportes() {
                 </thead>
                 <tbody id="rep-ranking">
                   {ranking.length === 0 ? (
-                    <tr><td colSpan="4" className="text-center py-4 text-muted"><i className="ti ti-alert-circle me-1"></i> Sin ventas en este período.</td></tr>
+                    <tr><td colSpan="4" className="text-center py-4 text-muted"><i className="ti ti-alert-circle me-1"></i> Sin ventas registradas.</td></tr>
                   ) : ranking.map((r, i) => (
                     <tr key={r.nombre}>
                       <td className="fw-bold" data-label="#">{i + 1}</td>
@@ -181,7 +169,7 @@ export default function AdminReportes() {
             </div>
             <div className="card-body">
               {Object.keys(estados).length === 0 ? (
-                <p className="text-muted small mb-0">Sin órdenes en este período.</p>
+                <p className="text-muted small mb-0">Sin órdenes registradas.</p>
               ) : (
                 <ul className="list-unstyled mb-0" id="rep-estados">
                   {Object.entries(estados).sort((a, b) => b[1] - a[1]).map(([estado, n]) => (

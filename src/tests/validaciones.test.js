@@ -35,6 +35,7 @@ describe('validarRUN, validarPassword y Luhn', () => {
   it('RUN con puntos y guión es inválido', () => expect(validarRUN('19.011.022-K').valido).toBe(false));
   it('contraseña con letra, número y símbolo', () => expect(validarPassword('ab1@').valido).toBe(true));
   it('tarjeta válida según Luhn', () => expect(validarTarjetaLuhn('4532 0151 1283 0366').valido).toBe(true));
+  it('acepta tarjetas válidas de 19 dígitos', () => expect(validarTarjetaLuhn('4532015112830366005').valido).toBe(true));
   it('tarjeta inválida según Luhn', () => expect(validarTarjetaLuhn('1234567890123456').valido).toBe(false));
   it('reglas de contraseña de registro', () => {
     expect(evaluarReglasPassword('Abcdef1!')).toEqual({ length: true, uppercase: true, number: true, special: true });
@@ -86,4 +87,5 @@ describe('validarCheckout', () => {
   });
   it('rechaza tarjeta vencida', () => expect(validarCheckout({ ...base, metodoPago: 'tarjeta', numTarjeta: '4532015112830366', vencimiento: '01/20', cvv: '123' }).vencimiento).toContain('vencida'));
   it('acepta tarjeta correcta', () => expect(validarCheckout({ ...base, metodoPago: 'tarjeta', numTarjeta: '4532015112830366', vencimiento: '12/99', cvv: '123' })).toEqual({}));
+  it('acepta tarjeta con vencimiento MM/AAAA a tres años', () => expect(validarCheckout({ ...base, metodoPago: 'tarjeta', numTarjeta: '4532015112830366005', vencimiento: '10/2029', cvv: '123' })).toEqual({}));
 });

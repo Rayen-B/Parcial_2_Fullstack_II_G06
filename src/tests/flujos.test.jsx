@@ -272,6 +272,8 @@ describe('Flujo de compra: checkout, pago correcto y pago con error', () => {
     cargarCarrito([ITEM]);
     const c = renderizar(<Rutas />, { ruta: '/checkout' });
     expect(c.querySelector('button[name="resultadoPago"][value="aprobado"]')).not.toBeNull();
+    expect(c.querySelector('#simular-error-pago')).toBeNull(); // el simulador de errores solo aparece al activarlo
+    clic(porId(c, 'modo-simulador'));
     expect(textoDe(c.querySelector('#simular-error-pago'))).toContain('Simular error de pago');
     expect(c.querySelector('.checkout-back')).not.toBeNull();
   });
@@ -289,6 +291,7 @@ describe('Flujo de compra: checkout, pago correcto y pago con error', () => {
     cargarCarrito([ITEM]);
     const c = renderizar(<Rutas />, { ruta: '/checkout' });
     llenar(c, '4532 0151 1283 0366');
+    clic(porId(c, 'modo-simulador'));
     clic(c.querySelector('button[name="resultadoPago"][value="rechazado"]'));
     expect(textoDe(c)).toContain('No se pudo realizar el pago');
     expect(JSON.parse(localStorage.getItem('papita_dulce_cart'))).toHaveLength(1);

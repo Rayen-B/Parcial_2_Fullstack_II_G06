@@ -279,7 +279,7 @@ export function validarCheckout(v) {
     if (v.metodoPago === 'tarjeta') {
         const tarjeta = validarTarjetaLuhn(v.numTarjeta);
         if (!tarjeta.valido) errores.numTarjeta = tarjeta.mensaje;
-        if (!/^\d{2}\/\d{2}$/.test((v.vencimiento || '').trim())) errores.vencimiento = 'Ingresa la fecha con formato MM/AA';
+        if (!/^\d{2}\/(?:\d{2}|\d{4})$/.test((v.vencimiento || '').trim())) errores.vencimiento = 'Ingresa la fecha con formato MM/AA o MM/AAAA';
         else if (tarjetaVencida(v.vencimiento.trim())) errores.vencimiento = 'La tarjeta está vencida';
         if (!/^\d{3,4}$/.test((v.cvv || '').trim())) errores.cvv = 'El CVV debe tener 3 o 4 números';
     }

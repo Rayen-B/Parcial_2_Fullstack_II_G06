@@ -85,3 +85,17 @@ Cada vista tiene su propio `<title>`, meta description y URL canónica (`useSeo`
 - Cubren renderizado, renderizado condicional, props, estado, eventos y flujos completos (compra con pago correcto y con error, panel admin), además de casos inválidos: RUN, correos, tarjetas, precios, stock insuficiente y datos dañados en `localStorage`.
 - Archivos principales: `stock-vitrina-insumos` (vitrina, recetas y trozos), `carrito-stock-y-categorias` (límites del carrito y checkout), `admin-y-paginas` y `admin-insumos-y-rutas` (panel y rutas protegidas), `flujos` (compras completas), `datos-y-migraciones` (localStorage), `reportes-y-ordenes` y las de validaciones.
 - `setup.js` agrega las APIs que jsdom no tiene (`scrollIntoView`, `scrollTo`, `matchMedia`...).
+
+## 💳 Checkout paso 3 y pantallas de pago (mejoras)
+
+- **Tarjeta flotante** (`TarjetaCredito.jsx`): se llena en vivo con número, titular y vencimiento; gira al escribir el CVV; cambia de color según la marca (Visa, Mastercard, American Express) y es solo decorativa (`aria-hidden`, no guarda datos).
+- **Formato automático** (`utils/pago.js`): número `4532 0151 1283 0366` (Amex `3782 822463 10005`), vencimiento `MM/AA` con la `/` automática, CVV solo números.
+- **Espera simulada "Procesando pago…"**: el resultado (aprobado o error) se muestra tras ~1,5 s, con el botón bloqueado para evitar pagos dobles. En las pruebas la espera es 0 (`configuracionPago.demoraMs`).
+- **Crédito o débito**: al pagar con tarjeta se elige el tipo; con crédito aparece el selector de cuotas (1, 3 o 6 sin interés). La orden guarda tipo, cuotas y solo los últimos 4 dígitos.
+- **Escritura del número sin trabarse**: el formato conserva la posición del cursor y permite borrar los espacios.
+- **Simulador de errores aparte**: las tarjetas de prueba, el selector de motivo y el botón *Simular error de pago* solo aparecen al activar el interruptor "Simulador de errores (solo demostración)". Apagado, el checkout se ve como una compra normal.
+- **Simulador de errores por motivo**: 5 tarjetas de prueba (rechazo del banco `4000 0000 0000 0002`, fondos insuficientes `...9995`, CVV incorrecto `...0127`, error del procesador `...0119`, tiempo agotado `...0259`) y un selector "Motivo del error simulado" junto al botón *Simular error de pago*. La orden guarda `codigoMotivo`.
+- **Pantalla de error rediseñada** (`CompraError.jsx`): ícono por motivo, explicación, consejo, "No se realizó ningún cobro", reintentar / elegir otro método y detalle del pedido plegable.
+- **Transferencia**: datos con botón *Copiar*, plazo de 24 horas y estado **Pendiente de pago** (no cuenta como ingreso hasta que el administrador la confirme con *Confirmar pago recibido* en el detalle de la orden).
+- **Efectivo**: campo "¿Con cuánto pagarás?" con cálculo de vuelto y **código de pedido** para mostrar al retirar o al repartidor.
+- Pruebas: `src/tests/pago-realista.test.jsx` (74 casos).
